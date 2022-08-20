@@ -22,8 +22,14 @@ def ui_display(properties, players, ui):
         if len(properties[i].name) > ui.widthStreets:
             ui.widthStreets = len(properties[i].name)
     ui.numberPlayers = len(players)
-    for i in range(ui.numberPlayers):
-        ui.widthPlayers += len(players[i].name) + 1
+    ui.widthPlayers = 8
+    for i in range(ui.numberStreets):
+        max = 0
+        for p in players:
+            if p.field == i:
+                max += 1 + len(p.name)
+        if max > ui.widthPlayers:
+            ui.widthPlayers = max
     ui.widthPlayers -= 1
 
     ui.widthCommand = ui.width - ui.widthStreets - ui.widthOwner - ui.widthPlayers - 4 - 100
@@ -61,19 +67,25 @@ def ui_display(properties, players, ui):
     ui.curs.addstr(0,ui.widthStreets + ui.widthOwner + 3, "Spieler")
     for i in range(ui.widthPlayers - 7):
         ui.curs.addstr(" ")
-    ui.curs.addstr("|")
+    ui.curs.addstr("|           ")
     ui.curs.move(1, ui.widthStreets + ui.widthOwner + 3)
     for i in range(ui.widthPlayers):
         ui.curs.addstr("-")
-    ui.curs.addstr("|")
+    ui.curs.addstr("|            ")
     for i in range(0, ui.numberStreets):
         ui.curs.move(2 + i, ui.widthStreets + ui.widthOwner + 3)
+        widthField = 1
         for p in players:
             if p.field == i:
+                if widthField > 1:
+                    ui.curs.addstr(" ")
+                    widthField += 1
                 ui.curs.addstr(p.name)
-        for i in range(ui.widthPlayers):
+                widthField += len(p.name)
+        for i in range(widthField - 1, ui.widthPlayers):
             ui.curs.addstr(" ")
         ui.curs.addstr("|")
+        ui.curs.addstr("               ")
 
     ui.curs.refresh()
 
