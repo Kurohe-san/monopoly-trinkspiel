@@ -17,17 +17,18 @@ def action(f, player, players, properties):
     match f[0]:
         case 'M':
             ui_command(["Du bist auf einem Geld-Feld!", "OK"],ui)
-            time.sleep(1)
+            #time.sleep(1)
             x = gen_money_card()
             ui_command([f"Die Geldkarte enthält... {x}$", "OK"],ui)
             player.add(x)
         case 'D':
             ui_command(["IT'S TIME TO DUEL!!!1!!1!", "HELL YEAH!"],ui)
-            dp = players[ui_command(list(map(lambda p: p.name, players)).insert(0,"Wähle einen Gegner aus:"), ui)-1]
+            dp = players[ui_command(["Wähle einen Gegner aus:"]+list(map(lambda p: p.name, players)), ui)-1]
 
             if dp.properties == []:
-                ui_command([f"{dp.name} hat keine Grundstücke.\nAbbruch...", "OK"],ui)
-            w = yes_no("Hat {player.name} gewonnen?",ui)
+                ui_command([f"{dp.name} hat keine Grundstücke. Abbruch...", "OK"],ui)
+                return
+            w = yes_no(f"Hat {player.name} gewonnen?",ui)
 
             played_property = random.choice(dp.properties)
             ui_command(f"Es ging um {played_property.output()}!","OK")
@@ -44,7 +45,7 @@ def action(f, player, players, properties):
             if not owned:
                 if yes_no("Kaufen?",ui):
                     if yes_no(f"Will jemand {player.name} herausfordern?",ui):
-                        if challenge(player.credit, properties[index].base_cost):
+                        if challenge(player.credit, properties[index].base_cost, ui):
                             properties[index].buy(player)
                     else:
                         properties[index].buy(player)
@@ -53,7 +54,7 @@ def action(f, player, players, properties):
             if properties[index].owner == player:
                 if yes_no("Bereits der Besitzer. Bebauen (erhöhen um 2 Getränkestufen)?",ui):
                     if yes_no(f"Will jemand {player.name} herausfordern?",ui):
-                        if challenge(player.credit, properties[index].base_cost):
+                        if challenge(player.credit, properties[index].base_cost, ui):
                             properties[index].build(player)
                     else:
                         properties[index].build(player)
@@ -62,7 +63,7 @@ def action(f, player, players, properties):
                 # Bestrafen (trinken) oder:
                 if yes_no("Abkaufen (statt saufen)?",ui):
                     if yes_no(f"Will {properties[index].owner.name} {player.name} herausfordern?",ui):
-                        if challenge(player.credit, properties[index].base_cost, 2):
+                        if challenge(player.credit, properties[index].base_cost, ui, 2):
                             transfer_property(properties[index].owner, player, properties[index], ui)
                     else:
                         transfer_property(properties[index].owner, player, properties[index], ui)
@@ -89,7 +90,7 @@ def transfer_property(old, new, prop,ui):
 
     old.properties.append(prop)
     new.properties.append(prop)
-    prop.owner(new)
+    prop.owner = new
 
 def init():
     properties = []
@@ -118,8 +119,8 @@ def init():
 if __name__ == '__main__':
     players,properties,fields,ui = init()
     cur_player = 0
-    c = ''
-    while c != "exit":
+    running = True
+    while running:
         # print("Info über das Spiel: ")
         # print_players(players)
         # print(Fore.GREEN + players[cur_player].name + Style.RESET_ALL + " ist an der Reihe!")
@@ -141,7 +142,7 @@ if __name__ == '__main__':
 
         
         # c = input("GAME >> ")
-        c = ui_command([players[cur_player].name + " ist an der Reihe", "Würfeln", "Spielanleitung"],ui)
+        c = ui_command([players[cur_player].name + " ist an der Reihe", "Würfeln", "Spielanleitung", "Beenden"],ui)
         if c == 2:
             pass
         #     print("exit - Exit the game")
@@ -155,3 +156,6 @@ if __name__ == '__main__':
             ui_display(properties,players,ui)
             action(fields[p.field],p, players, properties)
             cur_player = (cur_player + 1) % len(players)
+        elif c == 3:
+            if yes_no("Bist du dir sicher?", ui):
+                running = False
