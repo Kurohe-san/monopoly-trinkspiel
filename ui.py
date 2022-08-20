@@ -103,15 +103,29 @@ def ui_command(array):
 
     curs.move(0, startCommand)
     curs.addstr(array[0])
-    __print_answerers__(array, selectedAnswerer)
+    while True:
+        __print_answerers__(array, selectedAnswerer)
+        input = stdscr.getch()
+        if input == 65:
+            if selectedAnswerer > 1:
+                selectedAnswerer -= 1
+        elif input == 66:
+            if selectedAnswerer < len(array):
+                selectedAnswerer += 1
+        elif input == 10:
+            for i in range(len(array) + 1):
+                for j in range(widthCommand):
+                    curs.addstr(i, startCommand + j, " ")
+            curs.refresh()
+            return selectedAnswerer
 
 
 def __print_answerers__(array, selectedAnswerer):
-        for i in range(1, len(array)):
-            curs.move(1 + i, startCommand)
-            if i == selectedAnswerer:
-                curs.addstr(array[i], curses.color_pair(2))
-                curses.use_default_colors()
-            else:
-                curs.addstr(array[i])
+    for i in range(1, len(array)):
+        curs.move(1 + i, startCommand)
+        if i == selectedAnswerer:
+            curs.addstr(array[i], curses.color_pair(2))
+            curses.use_default_colors()
+        else:
+            curs.addstr(array[i])
     curs.refresh()
