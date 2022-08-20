@@ -113,7 +113,7 @@ def action(f, player, players, properties):
         case 'D':
             print("IT'S TIME TO DUEL!!!1!!1!")
             dp = select_player(players, True)
-            w = input("Hat der Herrausforderer gewonnen? y/N > ") == 'y'
+            w = input(f"Hat der {player.name} gewonnen? y/N > ") == 'y'
             played_property = random.choice(dp.properties)
             print(f"Es ging um {played_property.output()}!")
             if w:
