@@ -31,7 +31,7 @@ def ui_display(properties, players, ui):
     #width players
     ui.numberPlayers = len(players)
     ui.widthPlayers = 8
-    for i in range(ui.numberStreets):
+    for i in range(ui.numberStreets + 10):
         max = 0
         for p in players:
             if p.field == i:
@@ -51,11 +51,22 @@ def ui_display(properties, players, ui):
     for i in range(ui.widthStreets):
         ui.curs.addstr("-")
     ui.curs.addstr("|")
-    for i in range(ui.numberStreets):
+    extra = 0
+    for i in range(ui.numberStreets + 10):
         ui.curs.move(2 + i, 0)
         ui.curs.addstr("|")
-        ui.curs.addstr(properties[i].name)
-        for i in range(ui.widthStreets - len(properties[i].name)):
+        if not i in {0, 3 ,6, 9, 12, 13, 15, 18, 21, 24}:
+            ui.curs.addstr(properties[i - extra].name)
+            widthField = len(properties[i - extra].name)
+        elif i in {0, 13}:
+            ui.curs.addstr("Duell")
+            widthField = 5
+            extra += 1
+        else:
+            ui.curs.addstr("Geld")
+            widthField = 4
+            extra += 1
+        for i in range(ui.widthStreets - widthField):
             ui.curs.addstr(" ")
         ui.curs.addstr("|")
 
@@ -65,16 +76,24 @@ def ui_display(properties, players, ui):
     for i in range(ui.widthOwner):
         ui.curs.addstr("-")
     ui.curs.addstr("|")
-    for i in range(ui.numberStreets):
-        ui.curs.move(2 + i, ui.widthStreets + 2)
-        if properties[i].owner != None:
-            ui.curs.addstr(properties[i].owner.name)
-            widthField = len(properties[i].owner.name)
+    extra = 0
+    for i in range(ui.numberStreets + 10):
+        if not i in {0, 3 ,6, 9, 12, 13, 15, 18, 21, 24}:
+            ui.curs.move(2 + i, ui.widthStreets + 2)
+            if properties[i - extra].owner != None:
+                ui.curs.addstr(properties[i - extra].owner.name)
+                widthField = len(properties[i - extra].owner.name)
+            else:
+                widthField = 0
+            for i in range(widthField, ui.widthOwner):
+                ui.curs.addstr(" ")
+            ui.curs.addstr("|")
         else:
-            widthField = 0
-        for i in range(widthField, ui.widthOwner):
-            ui.curs.addstr(" ")
-        ui.curs.addstr("|")
+            ui.curs.move(2 + i, ui.widthStreets + 2)
+            extra += 1
+            for i in range(0, ui.widthOwner):
+                ui.curs.addstr(" ")
+            ui.curs.addstr("|")
 
     #add players
     ui.curs.addstr(0,ui.widthStreets + ui.widthOwner + 3, "Spieler")
@@ -85,7 +104,7 @@ def ui_display(properties, players, ui):
     for i in range(ui.widthPlayers):
         ui.curs.addstr("-")
     ui.curs.addstr("|            ")
-    for i in range(0, ui.numberStreets):
+    for i in range(0, ui.numberStreets + 10):
         ui.curs.move(2 + i, ui.widthStreets + ui.widthOwner + 3)
         widthField = 1
         for p in players:
