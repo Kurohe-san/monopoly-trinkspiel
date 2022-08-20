@@ -23,20 +23,20 @@ def print_players(players):
     for i,p in enumerate(players):
         print(f"{i}: {p.name} @ Feld Nr. {p.field} => {'  '.join([pr.output() for pr in p.properties])}")
 
-def select_player(players, output_properties=False):
-    print("Wähle einen Spieler aus:")
-    for i,p in enumerate(players):
-        print(f"{i}: {p.name} @ Feld Nr. {p.field}" + f"=> {'  '.join([pr.output() for pr in p.properties])}" if output_properties else "")
-    i = 0
-    i = int(input('> '))
-    while i > len(players)-1 or i<0:
-        print("Bist du behindert?")
-        i = int(input('> '))
-    return players[i]
+# def select_player(players, output_properties=False):
+#    print("Wähle einen Spieler aus:")
+#    for i,p in enumerate(players):
+#        print(f"{i}: {p.name} @ Feld Nr. {p.field}" + f"=> {'  '.join([pr.output() for pr in p.properties])}" if output_properties else "")
+#    i = 0
+#    i = int(input('> '))
+#    while i > len(players)-1 or i<0:
+#        print("Bist du behindert?")
+#        i = int(input('> '))
+#    return players[i]
 
-def challenge(credit, to_pay, factor=1):
+def challenge(credit, to_pay, ui, factor=1):
     diff = credit - factor*to_pay
-    print(f"Differenz: {diff} {'Oof!' if diff < 0 else 'Yay!'}")
+    ui_command([f"Differenz: {diff}",f"{'Oof!' if diff < 0 else 'Yay!'}"],ui)
     return diff > 0
 
 class Property:

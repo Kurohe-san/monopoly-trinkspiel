@@ -23,33 +23,36 @@ def action(f, player, players, properties):
             player.add(x)
         case 'D':
             ui_command(["IT'S TIME TO DUEL!!!1!!1!", "HELL YEAH!"],ui)
-            dp = select_player(players, True)
+            dp = players[ui_command(list(map(lambda p: p.name, players)).insert(0,"Wähle einen Gegner aus:"), ui)-1]
+
             if dp.properties == []:
                 ui_command([f"{dp.name} hat keine Grundstücke.\nAbbruch...", "OK"],ui)
             w = yes_no("Hat {player.name} gewonnen?",ui)
 
             played_property = random.choice(dp.properties)
-            print(f"Es ging um {played_property.output()}!")
+            ui_command(f"Es ging um {played_property.output()}!","OK")
             if w:
                 dp.properties.remove(played_property)
                 player.properties.append(played_property)
                 played_property.owner = player
         case 'P':
-            print("Du bist auf einem Geländefeld!")
+            ui_command(["Du bist auf einem Geländefeld!","OK"],ui)
             index = int(f[1:])
             owned = properties[index].owner != None
-            print(Fore.YELLOW + properties[index].output() + Style.RESET_ALL + "; Besitzer: " +Fore.GREEN+ (properties[index].owner.name if owned else '- ') + Style.RESET_ALL+ f"; Preis: {Fore.MAGENTA}{properties[index].base_cost}{Style.RESET_ALL}$")
+            ui_command([Fore.YELLOW + properties[index].output() + Style.RESET_ALL + "; Besitzer: " +Fore.GREEN+ (properties[index].owner.name if owned else '- ') + Style.RESET_ALL+ f"; Preis: {Fore.MAGENTA}{properties[index].base_cost}{Style.RESET_ALL}$","OK"],ui)
+
             if not owned:
-                if input("Kaufen? y/N > ") == 'y':
-                    if input(f"Will jemand {player.name} herausfordern? y/N > ") == 'y':
+                if yes_no("Kaufen?",ui):
+                    if yes_no(f"Will jemand {player.name} herausfordern?",ui):
                         if challenge(player.credit, properties[index].base_cost):
                             properties[index].buy(player)
                     else:
                         properties[index].buy(player)
+                    ui_display(properties,players,ui)
                 return
             if properties[index].owner == player:
-                if input("Bereits der Besitzer. Bebauen (erhöhen um 2 Getränkestufen)? y/N > ") == 'y':
-                    if input(f"Will jemand {player.name} herausfordern? y/N > ") == 'y':
+                if yes_no("Bereits der Besitzer. Bebauen (erhöhen um 2 Getränkestufen)?",ui):
+                    if yes_no(f"Will jemand {player.name} herausfordern?",ui):
                         if challenge(player.credit, properties[index].base_cost):
                             properties[index].build(player)
                     else:
@@ -57,31 +60,32 @@ def action(f, player, players, properties):
                 return
             if properties[index].owner != player:
                 # Bestrafen (trinken) oder:
-                if input("Abkaufen (statt saufen)? y/N > ") == 'y':
-                    if input(f"Will {properties[index].owner.name} {player.name} herausfordern? y/N > ") == 'y':
+                if yes_no("Abkaufen (statt saufen)?",ui):
+                    if yes_no(f"Will {properties[index].owner.name} {player.name} herausfordern?",ui):
                         if challenge(player.credit, properties[index].base_cost, 2):
-                            transfer_property(properties[index].owner, player, properties[index])
+                            transfer_property(properties[index].owner, player, properties[index], ui)
                     else:
-                        transfer_property(properties[index].owner, player, properties[index])
+                        transfer_property(properties[index].owner, player, properties[index], ui)
+                    ui_display(properties,players,ui)
                 return
 
 
-def transfer_property(old, new, prop):
+def transfer_property(old, new, prop,ui):
     x=random.randrange(10)
     if x<3:
-        print("Du MUSST den Preis bezahlen (ohne, dass du es kriegst)...")
+        ui_command(["Du MUSST den Preis bezahlen (ohne, dass du es kriegst)...","😢"],ui)
         new.remove(prop.base_cost)
         return
     elif x<6:
-        print("Du MUSST für den doppelten Preis kaufen...")
+        ui_command(["Du MUSST für den doppelten Preis kaufen...","😵"],ui)
         new.remove(prop.base_cost * 2)
         old.add(prop.base_cost)
     elif x<10:
-        print("Du MUSST für den normalen Preis kaufen...")
+        ui_command(["Du MUSST für den normalen Preis kaufen...","😌"],ui)
         new.remove(prop.base_cost)
         old.add(prop.base_cost)
     else:
-        print("Die Götter lieben dich! Du kriegst es kostenlos.")
+        ui_command(["Die Götter lieben dich! Du kriegst es kostenlos.","😎"],ui)
 
     old.properties.append(prop)
     new.properties.append(prop)

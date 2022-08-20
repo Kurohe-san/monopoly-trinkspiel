@@ -68,8 +68,8 @@ def ui_display(properties, players, ui):
     for i in range(ui.numberStreets):
         ui.curs.move(2 + i, ui.widthStreets + 2)
         if properties[i].owner != None:
-            ui.curs.addstr(properties[i].owner)
-            widthField = len(properties[i].owner)
+            ui.curs.addstr(properties[i].owner.name)
+            widthField = len(properties[i].owner.name)
         else:
             widthField = 0
         for i in range(widthField, ui.widthOwner):
