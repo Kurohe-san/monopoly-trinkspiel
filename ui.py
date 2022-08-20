@@ -16,84 +16,78 @@ def ui_init():
     stdscr = curses.initscr()
     return (curs, stdscr)
 
-def ui_display(properties, players, curs, stdscr):
-    widthStreets = 7
-    widthOwner = 8
-    widthPlayers = 0
-    widthCommand = None
-    startCommand = None
-    height,width = stdscr.getmaxyx()
-    numberStreets = len(properties)
-    for i in range(numberStreets):
-        if len(properties[i].name) > widthStreets:
-            widthStreets = len(properties[i].name)
-    numberPlayers = len(players)
-    for i in range(numberPlayers):
-        widthPlayers += len(players[i].name) + 1
-    widthPlayers -= 1
+def ui_display(properties, players, ui):
+    ui.numberStreets = len(properties)
+    for i in range(ui.numberStreets):
+        if len(properties[i].name) > ui.widthStreets:
+            ui.widthStreets = len(properties[i].name)
+    ui.numberPlayers = len(players)
+    for i in range(ui.numberPlayers):
+        ui.widthPlayers += len(players[i].name) + 1
+    ui.widthPlayers -= 1
 
-    widthCommand = width - widthStreets - widthOwner - widthPlayers - 4 - 100
-    startCommand = width//2 - widthCommand//2
+    ui.widthCommand = ui.width - ui.widthStreets - ui.widthOwner - ui.widthPlayers - 4 - 100
+    ui.startCommand = ui.width//2 - ui.widthCommand//2
 
 
     #add streets
-    curs.addstr(0,0, "|Straßen|") 
-    curs.move(1, 0)
-    curs.addstr("|")
-    for i in range(widthStreets):
-        curs.addstr("-")
-    curs.addstr("|")
-    for i in range(numberStreets):
-        curs.move(2 + i, 0)
-        curs.addstr("|")
-        curs.addstr(properties[i].name)
-        for i in range(widthStreets - len(properties[i].name)):
-            curs.addstr(" ")
-        curs.addstr("|")
+    ui.curs.addstr(0,0, "|Straßen|") 
+    ui.curs.move(1, 0)
+    ui.curs.addstr("|")
+    for i in range(ui.widthStreets):
+        ui.curs.addstr("-")
+    ui.curs.addstr("|")
+    for i in range(ui.numberStreets):
+        ui.curs.move(2 + i, 0)
+        ui.curs.addstr("|")
+        ui.curs.addstr(properties[i].name)
+        for i in range(ui.widthStreets - len(properties[i].name)):
+            ui.curs.addstr(" ")
+        ui.curs.addstr("|")
 
     #add owner
-    curs.addstr(0,widthStreets + 2, "Besitzer|")
-    curs.move(1, widthStreets + 2)
-    for i in range(widthOwner):
-        curs.addstr("-")
-    curs.addstr("|")
-    for i in range(numberStreets):
-        curs.move(2 + i, widthStreets + 2)
-        for i in range(widthOwner):
-            curs.addstr(" ")
-        curs.addstr("|")
+    ui.curs.addstr(0,ui.widthStreets + 2, "Besitzer|")
+    ui.curs.move(1, ui.widthStreets + 2)
+    for i in range(ui.widthOwner):
+        ui.curs.addstr("-")
+    ui.curs.addstr("|")
+    for i in range(ui.numberStreets):
+        ui.curs.move(2 + i, ui.widthStreets + 2)
+        for i in range(ui.widthOwner):
+            ui.curs.addstr(" ")
+        ui.curs.addstr("|")
 
     #add players
-    curs.addstr(0,widthStreets + widthOwner + 3, "Spieler")
-    for i in range(widthPlayers - 7):
-        curs.addstr(" ")
-    curs.addstr("|")
-    curs.move(1, widthStreets + widthOwner + 3)
-    for i in range(widthPlayers):
-        curs.addstr("-")
-    curs.addstr("|")
-    for i in range(0, numberStreets):
-        curs.move(2 + i, widthStreets + widthOwner + 3)
+    ui.curs.addstr(0,ui.widthStreets + ui.widthOwner + 3, "Spieler")
+    for i in range(ui.widthPlayers - 7):
+        ui.curs.addstr(" ")
+    ui.curs.addstr("|")
+    ui.curs.move(1, ui.widthStreets + ui.widthOwner + 3)
+    for i in range(ui.widthPlayers):
+        ui.curs.addstr("-")
+    ui.curs.addstr("|")
+    for i in range(0, ui.numberStreets):
+        ui.curs.move(2 + i, ui.widthStreets + ui.widthOwner + 3)
         for p in players:
             if p.field == i:
-                curs.addstr(p.name)
-        for i in range(widthPlayers):
-            curs.addstr(" ")
-        curs.addstr("|")
+                ui.curs.addstr(p.name)
+        for i in range(ui.widthPlayers):
+            ui.curs.addstr(" ")
+        ui.curs.addstr("|")
 
-    curs.refresh()
+    ui.curs.refresh()
 
-def ui_command(array, curs, stdscr):
+def ui_command(array, ui):
     if len(array) < 2:
         return -1
     
     selectedAnswerer = 1
-    startCommand = 100
-    curs.move(0, startCommand)
-    curs.addstr(array[0])
+    
+    ui.curs.move(0, ui.startCommand)
+    ui.curs.addstr(array[0])
     while True:
-        __print_answerers__(array, selectedAnswerer, curs, startCommand)
-        input = stdscr.getch()
+        __print_answerers__(array, selectedAnswerer, ui)
+        input = ui.stdscr.getch()
         if input == 65:
             if selectedAnswerer > 1:
                 selectedAnswerer -= 1
@@ -102,18 +96,18 @@ def ui_command(array, curs, stdscr):
                 selectedAnswerer += 1
         elif input == 10:
             for i in range(len(array) + 1):
-                for j in range(widthCommand):
-                    curs.addstr(i, startCommand + j, " ")
-            curs.refresh()
+                for j in range(ui.widthCommand):
+                    ui.curs.addstr(i, ui.startCommand + j, " ")
+            ui.curs.refresh()
             return selectedAnswerer
 
 
-def __print_answerers__(array, selectedAnswerer,curs,startCommand):
+def __print_answerers__(array, selectedAnswerer,ui):
     for i in range(1, len(array)):
-        curs.move(1 + i, startCommand)
+        ui.curs.move(1 + i, ui.startCommand)
         if i == selectedAnswerer:
-            curs.addstr(array[i], curses.color_pair(2))
+            ui.curs.addstr(array[i], curses.color_pair(2))
             curses.use_default_colors()
         else:
-            curs.addstr(array[i])
-    curs.refresh()
+            ui.curs.addstr(array[i])
+    ui.curs.refresh()

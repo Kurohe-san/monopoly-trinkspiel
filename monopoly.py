@@ -16,17 +16,17 @@ AKTIONEN:
 def action(f, player, players, properties):
     match f[0]:
         case 'M':
-            ui_command(["Du bist auf einem Geld-Feld!", "OK"],curs,stdscr)
+            ui_command(["Du bist auf einem Geld-Feld!", "OK"],ui)
             time.sleep(1)
             x = gen_money_card()
-            ui_command([f"Die Geldkarte enthält... {x}$", "OK"],curs,stdscr)
+            ui_command([f"Die Geldkarte enthält... {x}$", "OK"],ui)
             player.add(x)
         case 'D':
-            ui_command(["IT'S TIME TO DUEL!!!1!!1!", "HELL YEAH!"],curs,stdscr)
+            ui_command(["IT'S TIME TO DUEL!!!1!!1!", "HELL YEAH!"],ui)
             dp = select_player(players, True)
             if dp.properties == []:
-                ui_command([f"{dp.name} hat keine Grundstücke.\nAbbruch...", "OK"],curs,stdscr)
-            w = yes_no("Hat {player.name} gewonnen?",curs,stdscr)
+                ui_command([f"{dp.name} hat keine Grundstücke.\nAbbruch...", "OK"],ui)
+            w = yes_no("Hat {player.name} gewonnen?",ui)
 
             played_property = random.choice(dp.properties)
             print(f"Es ging um {played_property.output()}!")
@@ -102,17 +102,17 @@ def init():
             fields[i] = 'P'+str(j)
             j+=1
 
-    curs,stdscr = ui_init()
+    ui = UI()
 
     #while len(i:=input("Gebe einen Spielernamen ein: ")) > 0:
     #    players.append(Player(i))
     players.append(Player('Henri'))
     players.append(Player('Levin'))
-    ui_display(properties,players, curs, stdscr)
-    return (players,properties,fields,curs,stdscr)
+    ui_display(properties,players, ui)
+    return (players,properties,fields,ui)
 
 if __name__ == '__main__':
-    players,properties,fields,curs,stdscr = init()
+    players,properties,fields,ui = init()
     cur_player = 0
     c = ''
     while c != "exit":
@@ -137,7 +137,7 @@ if __name__ == '__main__':
 
         
         # c = input("GAME >> ")
-        c = ui_command([players[cur_player].name + " ist an der Reihe", "Würfeln", "Spielanleitung"],curs,stdscr)
+        c = ui_command([players[cur_player].name + " ist an der Reihe", "Würfeln", "Spielanleitung"],ui)
         if c == 2:
             pass
         #     print("exit - Exit the game")
@@ -145,8 +145,9 @@ if __name__ == '__main__':
         elif c == 1:
             w1 = random.randrange(1,6)
             w2 = random.randrange(1,6)
-            ui_command(["Du hast gewürfelt: " + str(w1) + " + " + str(w2), "OK"],curs,stdscr)
+            ui_command(["Du hast gewürfelt: " + str(w1) + " + " + str(w2), "OK"],ui)
             p = players[cur_player]
             p.move(w1+w2, 25)
+            ui_display(properties,players,ui)
             action(fields[p.field],p, players, properties)
             cur_player = (cur_player + 1) % len(players)

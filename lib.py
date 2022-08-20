@@ -13,8 +13,8 @@ DRINKS = [
     'H3'
         ]
 
-def yes_no(query,curs,stdscr,yes_first=False):
-    return ui_command([query,"Nein","Ja"],curs,stdscr) == 2
+def yes_no(query,ui,yes_first=False):
+    return ui_command([query,"Nein","Ja"],ui) == 2
 
 def gen_money_card():
     return random.randrange(-2000,10000)
@@ -100,3 +100,13 @@ class Player:
     def move(self, amount, field_size):
         self.field = (self.field + amount) % field_size
 
+class UI:
+    def __init__(self):
+        self.curs,self.stdscr = ui_init()
+        self.widthStreets = 7
+        self.widthOwner = 8
+        self.widthPlayers = 0
+        self.widthCommand = 0
+        self.startCommand = 0
+        self.height,self.width = self.stdscr.getmaxyx()
+        self.numberStreets = 0
