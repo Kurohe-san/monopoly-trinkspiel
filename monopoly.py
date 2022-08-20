@@ -144,7 +144,7 @@ def action(f, player, players, properties):
             if properties[index].owner != player:
                 # Bestrafen (trinken) oder:
                 if input("Abkaufen (statt saufen)? y/N > ") == 'y':
-                    if input(f"Will {properties[index].owner.name} {player.name} herrausfordern? y/N > "):
+                    if input(f"Will {properties[index].owner.name} {player.name} herrausfordern? y/N > ") == 'y':
                         if challenge(player.credit, properties[index].base_cost, 2):
                             transfer_property(properties[index].owner, player, properties[index])
                     else:
