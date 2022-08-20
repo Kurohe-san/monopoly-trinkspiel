@@ -24,7 +24,7 @@ widthPlayers = 0
 widthCommand = None
 startCommand = None
 
-def ui_init(streets, players):
+def ui_init(properties, players):
     global numberStreets
     global numberPlayers
     global widthStreets
@@ -32,13 +32,13 @@ def ui_init(streets, players):
     global widthPlayers
     global widthCommand
     global startCommand
-    numberStreets = len(streets)
+    numberStreets = len(properties)
     for i in range(numberStreets):
-        if len(streets[i]) > widthStreets:
-            widthStreets = len(streets[i])
+        if len(properties[i].name) > widthStreets:
+            widthStreets = len(properties[i].name)
     numberPlayers = len(players)
     for i in range(numberPlayers):
-        widthPlayers += len(players[i]) + 1
+        widthPlayers += len(players[i].name) + 1
     widthPlayers -= 1
 
     widthCommand = width - widthStreets - widthOwner - widthPlayers - 4 - 100
@@ -55,8 +55,8 @@ def ui_init(streets, players):
     for i in range(numberStreets):
         curs.move(2 + i, 0)
         curs.addstr("|")
-        curs.addstr(streets[i])
-        for i in range(widthStreets - len(streets[i])):
+        curs.addstr(properties[i].name)
+        for i in range(widthStreets - len(properties[i].name)):
             curs.addstr(" ")
         curs.addstr("|")
 
@@ -83,7 +83,7 @@ def ui_init(streets, players):
     curs.addstr("|")
     curs.move(2, widthStreets + widthOwner + 3)
     for i in range(numberPlayers):
-        curs.addstr(players[i])
+        curs.addstr(players[i].name)
         if i < numberPlayers -1:
             curs.addstr(" ")
     curs.addstr("|")
@@ -110,7 +110,7 @@ def ui_command(array):
             if selectedAnswerer > 1:
                 selectedAnswerer -= 1
         elif input == 66:
-            if selectedAnswerer < len(array):
+            if selectedAnswerer < len(array) - 1:
                 selectedAnswerer += 1
         elif input == 10:
             for i in range(len(array) + 1):

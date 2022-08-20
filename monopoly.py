@@ -4,6 +4,7 @@ import random
 import time
 from colorama import Fore,Style
 from lib import *
+from ui import *
 
 """
 AKTIONEN:
@@ -15,13 +16,13 @@ AKTIONEN:
 def action(f, player, players, properties):
     match f[0]:
         case 'M':
-            print("Du bist auf einem Geld-Feld!")
+            ui_command(["Du bist auf einem Geld-Feld!", "OK"])
             time.sleep(1)
             x = gen_money_card()
-            print(f"Die Geldkarte enthält... {x}$")
+            ui_command([f"Die Geldkarte enthält... {x}$", "OK"])
             player.add(x)
         case 'D':
-            print("IT'S TIME TO DUEL!!!1!!1!")
+            ui_command(["IT'S TIME TO DUEL!!!1!!1!", "OK"])
             dp = select_player(players, True)
             if dp.properties == []:
                 print(f"{dp.name} hat keine Grundstücke.\nAbbruch...")
@@ -102,8 +103,12 @@ def init():
             j+=1
 
     print("Hallo.")
-    while len(i:=input("Gebe einen Spielernamen ein: ")) > 0:
-        players.append(Player(i))
+
+    #while len(i:=input("Gebe einen Spielernamen ein: ")) > 0:
+    #    players.append(Player(i))
+    players.append(Player('Henri'))
+    players.append(Player('Levin'))
+    ui_init(properties,players)
     return (players,properties,fields)
 
 if __name__ == '__main__':
@@ -111,37 +116,37 @@ if __name__ == '__main__':
     cur_player = 0
     c = ''
     while c != "exit":
-        print("Info über das Spiel: ")
-        print_players(players)
-        print(Fore.GREEN + players[cur_player].name + Style.RESET_ALL + " ist an der Reihe!")
-        if players[cur_player].credit < 0:
-            print(Fore.RED+"ACHTUNG: Dein Kontostand ist negativ."+Style.RESET_ALL)
+        # print("Info über das Spiel: ")
+        # print_players(players)
+        # print(Fore.GREEN + players[cur_player].name + Style.RESET_ALL + " ist an der Reihe!")
+        # if players[cur_player].credit < 0:
+        #     print(Fore.RED+"ACHTUNG: Dein Kontostand ist negativ."+Style.RESET_ALL)
       
 
         # Grafische Darstellung des Spielfeldes
-        print('')
-        player_str = '-' * 25 
-        for p in players:
-            e = p.name[0]
-            if player_str[p.field] != '-':
-                e = '*'
-            player_str = player_str[:p.field] + p.name[0] + player_str[p.field+1:]
-        print(Fore.GREEN +player_str)
-        print(Fore.BLUE +''.join([f[0] for f in fields])+Style.RESET_ALL)
-        print('')
+        # print('')
+        # player_str = '-' * 25 
+        # for p in players:
+        #     e = p.name[0]
+        #     if player_str[p.field] != '-':
+        #         e = '*'
+        #     player_str = player_str[:p.field] + p.name[0] + player_str[p.field+1:]
+        # print(Fore.GREEN +player_str)
+        # print(Fore.BLUE +''.join([f[0] for f in fields])+Style.RESET_ALL)
+        # print('')
 
-        c = input("GAME >> ")
-        if c == "help":
-            print("exit - Exit the game")
-            print("\n\n")
-        elif c.startswith('r'):
-            time.sleep(1)
+        
+        # c = input("GAME >> ")
+        c = ui_command([players[cur_player].name + " ist an der Reihe", "Würfeln", "Spielanleitung"])
+        if c == 2:
+            pass
+        #     print("exit - Exit the game")
+        #     print("\n\n")
+        elif c == 1:
             w1 = random.randrange(1,6)
             w2 = random.randrange(1,6)
-            print(f"Du hast gewürfelt: {w1} + {w2} = {w1+w2}")
-            time.sleep(1)
+            ui_command(["Du hast gewürfelt: " + str(w1) + " + " + str(w2), "OK"])
             p = players[cur_player]
             p.move(w1+w2, 25)
             action(fields[p.field],p, players, properties)
             cur_player = (cur_player + 1) % len(players)
-
