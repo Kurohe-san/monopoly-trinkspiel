@@ -1,5 +1,6 @@
 import random
 import names
+from ui import *
 
 DRINKS = [
     'S1',
@@ -11,6 +12,9 @@ DRINKS = [
     'H2',
     'H3'
         ]
+
+def yes_no(query,curs,stdscr,yes_first=False):
+    return ui_command([query,"Nein","Ja"],curs,stdscr) == 2
 
 def gen_money_card():
     return random.randrange(-2000,10000)

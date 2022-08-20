@@ -83,16 +83,16 @@ def ui_display(properties, players, curs, stdscr):
 
     curs.refresh()
 
-def ui_command(array):
+def ui_command(array, curs, stdscr):
     if len(array) < 2:
         return -1
     
     selectedAnswerer = 1
-
+    startCommand = 100
     curs.move(0, startCommand)
     curs.addstr(array[0])
     while True:
-        __print_answerers__(array, selectedAnswerer)
+        __print_answerers__(array, selectedAnswerer, curs, startCommand)
         input = stdscr.getch()
         if input == 65:
             if selectedAnswerer > 1:
@@ -108,7 +108,7 @@ def ui_command(array):
             return selectedAnswerer
 
 
-def __print_answerers__(array, selectedAnswerer):
+def __print_answerers__(array, selectedAnswerer,curs,startCommand):
     for i in range(1, len(array)):
         curs.move(1 + i, startCommand)
         if i == selectedAnswerer:
