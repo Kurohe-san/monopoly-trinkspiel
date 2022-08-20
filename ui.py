@@ -25,8 +25,8 @@ def ui_display(properties, players, ui):
     #width owners
     ui.widthOwner = 8
     for p in properties:
-        if ui.widthOwner < len(p.owner):
-            ui.widthOwner = len(p.owner)
+        if ui.widthOwner < len(p.owner.name):
+            ui.widthOwner = len(p.owner.name)
 
     #width players
     ui.numberPlayers = len(players)
