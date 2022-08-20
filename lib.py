@@ -1,5 +1,5 @@
 import random
-import random_name_generator as rng
+import names
 
 DRINKS = [
     'S1',
@@ -76,9 +76,8 @@ class Property:
             c = 6
         else:
             c = 7
-        return Property('-'.join(rng.generate_one(rng.Descent.ENGLISH, sex=rng.Sex.MALE).split(' '))+'-'+random.choice(['Street','Boulevard','Avenue']),
-            x,
-            c)
+        name = names.get_full_name().replace(' ','-')+'-'+random.choice(['Street','Boulevard','Avenue'])
+        return Property(name,x,c)
 
 
 class Player:

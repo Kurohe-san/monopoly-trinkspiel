@@ -23,7 +23,10 @@ def action(f, player, players, properties):
         case 'D':
             print("IT'S TIME TO DUEL!!!1!!1!")
             dp = select_player(players, True)
-            w = input(f"Hat der {player.name} gewonnen? y/N > ") == 'y'
+            if dp.properties == []:
+                print(f"{dp.name} hat keine Grundstücke.\nAbbruch...")
+            w = input(f"Hat {player.name} gewonnen? y/N > ") == 'y'
+
             played_property = random.choice(dp.properties)
             print(f"Es ging um {played_property.output()}!")
             if w:
@@ -37,7 +40,7 @@ def action(f, player, players, properties):
             print(Fore.YELLOW + properties[index].output() + Style.RESET_ALL + "; Besitzer: " +Fore.GREEN+ (properties[index].owner.name if owned else '- ') + Style.RESET_ALL+ f"; Preis: {Fore.MAGENTA}{properties[index].base_cost}{Style.RESET_ALL}$")
             if not owned:
                 if input("Kaufen? y/N > ") == 'y':
-                    if input(f"Will jemand {player.name} herrausfordern? y/N > ") == 'y':
+                    if input(f"Will jemand {player.name} herausfordern? y/N > ") == 'y':
                         if challenge(player.credit, properties[index].base_cost):
                             properties[index].buy(player)
                     else:
@@ -45,7 +48,7 @@ def action(f, player, players, properties):
                 return
             if properties[index].owner == player:
                 if input("Bereits der Besitzer. Bebauen (erhöhen um 2 Getränkestufen)? y/N > ") == 'y':
-                    if input(f"Will jemand {player.name} herrausfordern? y/N > ") == 'y':
+                    if input(f"Will jemand {player.name} herausfordern? y/N > ") == 'y':
                         if challenge(player.credit, properties[index].base_cost):
                             properties[index].build(player)
                     else:
@@ -54,7 +57,7 @@ def action(f, player, players, properties):
             if properties[index].owner != player:
                 # Bestrafen (trinken) oder:
                 if input("Abkaufen (statt saufen)? y/N > ") == 'y':
-                    if input(f"Will {properties[index].owner.name} {player.name} herrausfordern? y/N > ") == 'y':
+                    if input(f"Will {properties[index].owner.name} {player.name} herausfordern? y/N > ") == 'y':
                         if challenge(player.credit, properties[index].base_cost, 2):
                             transfer_property(properties[index].owner, player, properties[index])
                     else:
