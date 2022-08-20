@@ -4,34 +4,25 @@ from glob import glob
 import numbers
 import time
 
-curs = curses.initscr()
-curses.curs_set(0)
-curses.noecho()
-curses.cbreak()
-curses.start_color()
-curses.use_default_colors()
-curses.init_pair(1, 11, -1)
-curses.init_pair(2, 0, 7)
-stdscr = curses.initscr()
-height,width = stdscr.getmaxyx()
+def ui_init():
+    curs = curses.initscr()
+    curses.curs_set(0)
+    curses.noecho()
+    curses.cbreak()
+    curses.start_color()
+    curses.use_default_colors()
+    curses.init_pair(1, 11, -1)
+    curses.init_pair(2, 0, 7)
+    stdscr = curses.initscr()
+    return (curs, stdscr)
 
-numberStreets = None
-numberPlayers = None
-
-widthStreets = 7
-widthOwner = 8
-widthPlayers = 0
-widthCommand = None
-startCommand = None
-
-def ui_init(properties, players):
-    global numberStreets
-    global numberPlayers
-    global widthStreets
-    global widthOwner
-    global widthPlayers
-    global widthCommand
-    global startCommand
+def ui_display(properties, players, curs, stdscr):
+    widthStreets = 7
+    widthOwner = 8
+    widthPlayers = 0
+    widthCommand = None
+    startCommand = None
+    height,width = stdscr.getmaxyx()
     numberStreets = len(properties)
     for i in range(numberStreets):
         if len(properties[i].name) > widthStreets:
@@ -81,14 +72,11 @@ def ui_init(properties, players):
     for i in range(widthPlayers):
         curs.addstr("-")
     curs.addstr("|")
-    curs.move(2, widthStreets + widthOwner + 3)
-    for i in range(numberPlayers):
-        curs.addstr(players[i].name)
-        if i < numberPlayers -1:
-            curs.addstr(" ")
-    curs.addstr("|")
-    for i in range(1, numberStreets):
+    for i in range(0, numberStreets):
         curs.move(2 + i, widthStreets + widthOwner + 3)
+        for p in players:
+            if p.field == i:
+                curs.addstr(p.name)
         for i in range(widthPlayers):
             curs.addstr(" ")
         curs.addstr("|")
