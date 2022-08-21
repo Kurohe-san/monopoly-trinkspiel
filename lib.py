@@ -1,6 +1,7 @@
 import random
 import names
 from ui import *
+import json
 
 DRINKS = [
     'S1',
@@ -30,7 +31,7 @@ REGELN:
 """
 
 def yes_no(query,ui,yes_first=False):
-    return ui_command([query,"Nein","Ja"],ui) == 2
+    return ui_command([query] + (["Ja","Nein"] if yes_first else ["Nein","Ja"]),ui) == 2
 
 def gen_money_card():
     return random.randrange(-2000,10000)
@@ -54,6 +55,11 @@ def challenge(credit, to_pay, ui, factor=1):
     diff = credit - factor*to_pay
     ui_command([f"Differenz: {diff}",f"{'Oof!' if diff < 0 else 'Yay!'}"],ui)
     return diff > 0
+
+#def save_data(players, properties, save_file_name):
+#    with open(save_file_name+'.json','w') as f:
+#        json.dump()
+
 
 class Property:
     def __init__(self,name, base_cost, rent):
@@ -103,7 +109,7 @@ class Property:
 class Player:
     def __init__(self,name):
         self.name = name
-        self.credit = sum([gen_money_card() for i in range(2)])
+        self.credit = sum([gen_money_card() for _ in range(2)])
         self.field = 0
         self.properties = []
 
