@@ -56,9 +56,9 @@ def challenge(credit, to_pay, ui, factor=1):
     ui_command([f"Differenz: {diff}",f"{'Oof!' if diff < 0 else 'Yay!'}"],ui)
     return diff > 0
 
-#def save_data(players, properties, save_file_name):
-#    with open(save_file_name+'.json','w') as f:
-#        json.dump()
+def save_data(players, properties, save_file_name):
+    with open(save_file_name+'.json','w') as f:
+        json.dump({'players':list(map(lambda p: p.to_dict(), players)), 'properties':list(map(lambda p: p.to_dict(), properties))}, f)
 
 
 class Property:
@@ -105,6 +105,13 @@ class Property:
         name = names.get_full_name().replace(' ','-')+'-'+random.choice(['Street','Boulevard','Avenue'])
         return Property(name,x,c)
 
+    def to_dict(self):
+        return {
+            'name': self.name,
+            'base_cost': self.base_cost,
+            'rent': self.rent
+        }
+
 
 class Player:
     def __init__(self,name):
@@ -121,6 +128,13 @@ class Player:
 
     def move(self, amount, field_size):
         self.field = (self.field + amount) % field_size
+
+    def to_dict(self):
+        return {
+            'name': self.name,
+            'credit': self.credit,
+            'field': self.field
+        }
 
 class UI:
     def __init__(self):
