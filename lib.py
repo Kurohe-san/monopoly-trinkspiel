@@ -1,6 +1,6 @@
 import random
 import names
-from ui import *
+from ui import ui_command, ui_init
 import json
 
 DRINKS = [
@@ -127,6 +127,7 @@ class UI:
         self.curs,self.stdscr = ui_init()
         self.widthStreets = 7
         self.widthOwner = 8
+        self.widthRent = 5
         self.widthPlayers = 0
         self.widthCommand = 0
         self.maxWidthCommand = 0

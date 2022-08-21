@@ -1,4 +1,5 @@
 from lib import *
+import lib
 import curses
 from glob import glob
 import numbers
@@ -23,22 +24,27 @@ def ui_display(properties, players, ui):
         if len(properties[i].name) > ui.widthStreets:
             ui.widthStreets = len(properties[i].name)
     
-    #width owners
+    #width owner
     ui.widthOwner = 8
     for p in properties:
         if p.owner != None and ui.widthOwner < len(p.owner.name):
             ui.widthOwner = len(p.owner.name)
 
+    #width rent
+    ui.widthRent = 5
+    if ui.widthRent < max(list(map(lambda s: len(s), lib.DRINKS))):
+        ui.widthRent = len(p)
+
     #width players
     ui.numberPlayers = len(players)
     ui.widthPlayers = 8
     for i in range(ui.numberStreets + 10):
-        max = 0
+        maxWidth = 0
         for p in players:
             if p.field == i:
-                max += 1 + len(p.name)
-        if max > ui.widthPlayers:
-            ui.widthPlayers = max
+                maxWidth += 1 + len(p.name)
+        if maxWidth > ui.widthPlayers:
+            ui.widthPlayers = maxWidth
     ui.widthPlayers -= 1
 
     ui.maxWidthCommand = ui.width - ui.widthStreets - ui.widthOwner - ui.widthPlayers - 4 - 100
@@ -46,16 +52,25 @@ def ui_display(properties, players, ui):
 
 
     #add streets
-    ui.curs.addstr(0,0, "|Straßen|") 
-    ui.curs.move(1, 0)
-    ui.curs.addstr("|")
+    ui.curs.addstr(0, 0, "┌")
+    ui.curs.addstr(0, ui.widthStreets + 1, "┬")
+    ui.curs.addstr(1,0, "│Straßen")
+    for i in range(ui.widthStreets - 7):
+        ui.curs.addstr(" ")
+    ui.curs.addstr(1, 0, "│")
+    ui.curs.addstr(1, ui.widthStreets + 1, "│")
+    ui.curs.addstr(2, 0, "├")
+    ui.curs.addstr(2, ui.widthStreets + 1, "┼")
+    ui.curs.addstr(ui.numberStreets + 13, 0, "└")
+    ui.curs.addstr(ui.numberStreets + 13, ui.widthStreets + 1, "┴")
     for i in range(ui.widthStreets):
-        ui.curs.addstr("-")
-    ui.curs.addstr("|")
+        ui.curs.addstr(0, i + 1, "─")
+        ui.curs.addstr(2, i + 1, "─")
+        ui.curs.addstr(ui.numberStreets + 13, i + 1, "─")
     extra = 0
     for i in range(ui.numberStreets + 10):
-        ui.curs.move(2 + i, 0)
-        ui.curs.addstr("|")
+        ui.curs.move(3 + i, 0)
+        ui.curs.addstr("│")
         if not i in {0, 3 ,6, 9, 12, 13, 15, 18, 21, 24}:
             ui.curs.addstr(properties[i - extra].name)
             widthField = len(properties[i - extra].name)
@@ -69,18 +84,24 @@ def ui_display(properties, players, ui):
             extra += 1
         for i in range(ui.widthStreets - widthField):
             ui.curs.addstr(" ")
-        ui.curs.addstr("|")
+        ui.curs.addstr("│")
 
     #add owner
-    ui.curs.addstr(0,ui.widthStreets + 2, "Besitzer|")
-    ui.curs.move(1, ui.widthStreets + 2)
+    ui.curs.addstr(0, ui.widthStreets + ui.widthOwner + 2, "┬")
+    ui.curs.addstr(1, ui.widthStreets + 1, "│Besitzer")
+    for i in range(ui.widthOwner - 8):
+        ui.curs.addstr(" ")
+    ui.curs.addstr(1, ui.widthStreets + ui.widthOwner + 2, "│")
+    ui.curs.addstr(2, ui.widthStreets + ui.widthOwner + 2, "┼")
+    ui.curs.addstr(ui.numberStreets + 13, ui.widthStreets + ui.widthOwner + 2, "┴")
     for i in range(ui.widthOwner):
-        ui.curs.addstr("-")
-    ui.curs.addstr("|")
+        ui.curs.addstr(0, ui.widthStreets + i + 2, "─")
+        ui.curs.addstr(2, ui.widthStreets + i + 2, "─")
+        ui.curs.addstr(ui.numberStreets + 13, ui.widthStreets + i + 2, "─")
     extra = 0
     for i in range(ui.numberStreets + 10):
         if not i in {0, 3 ,6, 9, 12, 13, 15, 18, 21, 24}:
-            ui.curs.move(2 + i, ui.widthStreets + 2)
+            ui.curs.move(3 + i, ui.widthStreets + 2)
             if properties[i - extra].owner != None:
                 ui.curs.addstr(properties[i - extra].owner.name)
                 widthField = len(properties[i - extra].owner.name)
@@ -88,25 +109,58 @@ def ui_display(properties, players, ui):
                 widthField = 0
             for i in range(widthField, ui.widthOwner):
                 ui.curs.addstr(" ")
-            ui.curs.addstr("|")
+            ui.curs.addstr("│")
         else:
-            ui.curs.move(2 + i, ui.widthStreets + 2)
+            ui.curs.move(3 + i, ui.widthStreets + 2)
             extra += 1
             for i in range(0, ui.widthOwner):
                 ui.curs.addstr(" ")
-            ui.curs.addstr("|")
+            ui.curs.addstr("│")
+
+    #add rent
+    ui.curs.addstr(0, ui.widthStreets + ui.widthOwner + ui.widthRent + 3, "┬")
+    ui.curs.addstr(1, ui.widthStreets + ui.widthOwner + 2, "│Miete")
+    for i in range(ui.widthRent - 5):
+        ui.curs.addstr(" ")
+    ui.curs.addstr(1, ui.widthStreets + ui.widthOwner + ui.widthRent + 3, "│")
+    ui.curs.addstr(2, ui.widthStreets + ui.widthOwner + ui.widthRent + 3, "┼")
+    ui.curs.addstr(ui.numberStreets + 13, ui.widthStreets + ui.widthOwner + ui.widthRent + 3, "┴")
+    for i in range(ui.widthRent):
+        ui.curs.addstr(0, ui.widthStreets + ui.widthOwner + i + 3, "─")
+        ui.curs.addstr(2, ui.widthStreets + ui.widthOwner + i + 3, "─")
+        ui.curs.addstr(ui.numberStreets + 13, ui.widthStreets + ui.widthOwner + i + 3, "─")
+    extra = 0
+    for i in range(ui.numberStreets + 10):
+        if (not i in {0, 3 ,6, 9, 12, 13, 15, 18, 21, 24}) and (properties[i - extra].owner != None):
+            ui.curs.move(3 + i, ui.widthStreets + ui.widthOwner + 3)
+            ui.curs.addstr(lib.DRINKS[properties[i - extra].rent])
+            widthField = len(lib.DRINKS[properties[i - extra].rent])
+            for i in range(widthField, ui.widthRent):
+                ui.curs.addstr(" ")
+            ui.curs.addstr("│")
+        else:
+            ui.curs.move(3 + i, ui.widthStreets + ui.widthOwner + 3)
+            if i in {0, 3 ,6, 9, 12, 13, 15, 18, 21, 24}:
+                extra += 1
+            for i in range(0, ui.widthRent):
+                ui.curs.addstr(" ")
+            ui.curs.addstr("│")
 
     #add players
-    ui.curs.addstr(0,ui.widthStreets + ui.widthOwner + 3, "Spieler")
-    for i in range(ui.widthPlayers - 7):
+    ui.curs.addstr(0, ui.widthStreets + ui.widthOwner + ui.widthRent + ui.widthPlayers + 4, "┐")
+    ui.curs.addstr(1, ui.widthStreets + ui.widthOwner + ui.widthRent + 4, "Spieler")
+    for i in range(ui.widthOwner - 8):
         ui.curs.addstr(" ")
-    ui.curs.addstr("|           ")
-    ui.curs.move(1, ui.widthStreets + ui.widthOwner + 3)
+    ui.curs.addstr(1, ui.widthStreets + ui.widthOwner + ui.widthRent + ui.widthPlayers + 4, "│")
+    ui.curs.addstr(2, ui.widthStreets + ui.widthOwner + ui.widthRent + ui.widthPlayers + 4, "┤")
+    ui.curs.addstr(ui.numberStreets + 13, ui.widthStreets + ui.widthOwner + ui.widthRent + ui.widthPlayers + 4, "┘")
     for i in range(ui.widthPlayers):
-        ui.curs.addstr("-")
-    ui.curs.addstr("|            ")
+        ui.curs.addstr(0, ui.widthStreets + ui.widthOwner + ui.widthRent + i  + 4, "─")
+        ui.curs.addstr(2, ui.widthStreets + ui.widthOwner + ui.widthRent + i  + 4, "─")
+        ui.curs.addstr(ui.numberStreets + 13, ui.widthStreets + ui.widthOwner + ui.widthRent + i + 4, "─")
+
     for i in range(0, ui.numberStreets + 10):
-        ui.curs.move(2 + i, ui.widthStreets + ui.widthOwner + 3)
+        ui.curs.move(3 + i, ui.widthStreets + ui.widthOwner + ui.widthRent + 4)
         widthField = 1
         for p in players:
             if p.field == i:
@@ -117,10 +171,9 @@ def ui_display(properties, players, ui):
                 widthField += len(p.name)
         for i in range(widthField - 1, ui.widthPlayers):
             ui.curs.addstr(" ")
-        ui.curs.addstr("|")
-        ui.curs.addstr("               ")
-
+        ui.curs.addstr("│")
     ui.curs.refresh()
+
 
 def ui_command(array, ui):
     if len(array) < 2:
@@ -129,8 +182,9 @@ def ui_command(array, ui):
     #print box
     ui.widthCommand = 0
     for a in array:
-        if len(a) > ui.widthCommand and len(a) + 2 <= ui.maxWidthCommand:
-            ui.widthCommand = len(a) + 2
+        lenA = len(a.encode('utf-16-le')) // 2
+        if lenA > ui.widthCommand and lenA + 2 <= ui.maxWidthCommand:
+            ui.widthCommand = lenA + 2
     ui.startCommand = ui.minStartCommand + (ui.maxWidthCommand - ui.widthCommand) // 2
 
     ui.curs.addstr(0, ui.startCommand, "┌")
@@ -152,7 +206,7 @@ def ui_command(array, ui):
     selectedAnswerer = 1
     
     ui.curs.move(1, ui.startCommand + (ui.widthCommand - len(array[0])) // 2)
-    ui.curs.addstr(f"{array[0]}")
+    ui.curs.addstr(array[0])
     while True:
         __print_answerers__(array, selectedAnswerer, ui)
         input = ui.stdscr.getch()
@@ -179,3 +233,43 @@ def __print_answerers__(array, selectedAnswerer,ui):
         else:
             ui.curs.addstr(array[i])
     ui.curs.refresh()
+
+
+def ui_input(question, ui):
+
+    #print box
+    ui.widthCommand = 0
+    if len(question) + 2 <= ui.maxWidthCommand:
+            ui.widthCommand = len(question) + 2
+    ui.startCommand = ui.minStartCommand + (ui.maxWidthCommand - ui.widthCommand) // 2
+
+    ui.curs.addstr(0, ui.startCommand, "┌")
+    ui.curs.addstr(0, ui.startCommand + ui.widthCommand - 1, "┐")
+    ui.curs.addstr(1, ui.startCommand , "│")
+    ui.curs.addstr(1, ui.startCommand + ui.widthCommand - 1, "│")
+    ui.curs.addstr(2, ui.startCommand , "├")
+    ui.curs.addstr(2, ui.startCommand + ui.widthCommand - 1, "┤")
+    ui.curs.addstr(3, ui.startCommand , "│")
+    ui.curs.addstr(3, ui.startCommand + ui.widthCommand - 1, "│")
+    ui.curs.addstr(4, ui.startCommand, "└")
+    ui.curs.addstr(4, ui.startCommand + ui.widthCommand - 1, "┘")
+    for i in range(ui.widthCommand - 2):
+        ui.curs.addstr(0, ui.startCommand + i + 1, "─")
+        ui.curs.addstr(2, ui.startCommand + i + 1, "─")
+        ui.curs.addstr(4, ui.startCommand + i + 1, "─")
+
+    ui.curs.addstr(1, ui.startCommand + 1, question)
+    ui.curs.move(3, ui.startCommand + 1)
+    curses.echo()
+    curses.curs_set(1)
+    ui.curs.refresh()
+
+    input = ui.stdscr.getstr().decode()
+
+    curses.noecho()
+    curses.curs_set(0)
+    for i in range(5):
+        for j in range(ui.widthCommand):
+            ui.curs.addstr(i, ui.startCommand + j, " ")
+    ui.curs.refresh()
+    return input

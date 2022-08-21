@@ -110,8 +110,14 @@ def init():
 
     #while len(i:=input("Gebe einen Spielernamen ein: ")) > 0:
     #    players.append(Player(i))
-    players.append(Player('Henri'))
-    players.append(Player('Levin'))
+    ui_display(properties,players, ui)
+    players.append(Player(ui_input("Gebe einen Spieler ein", ui)))
+    ui_display(properties,players, ui)
+    while True:
+        players.append(Player(ui_input("Gebe einen Spieler ein", ui)))
+        ui_display(properties,players, ui)
+        if ui_command(["Noch ein Spieler?", "Ja", "Nein"], ui) == 2:
+            break
     ui_display(properties,players, ui)
     return (players,properties,fields,ui)
 
@@ -143,7 +149,7 @@ if __name__ == '__main__':
         commands = [players[cur_player].name] + [UI_TOKEN['UI_TOKEN_ROLL'], UI_TOKEN['UI_TOKEN_RULES'], UI_TOKEN['UI_TOKEN_SAVE'], UI_TOKEN['UI_TOKEN_LOAD'], UI_TOKEN['UI_TOKEN_EXIT']]
         c = ui_command(commands,ui)
         if commands[c] == UI_TOKEN['UI_TOKEN_RULES']:
-            ui_command([RULES, "OK"])
+            ui_command([RULES, "OK"], ui)
         elif c == 1:
             w1 = random.randrange(1,6)
             w2 = random.randrange(1,6)
@@ -155,4 +161,8 @@ if __name__ == '__main__':
             cur_player = (cur_player + 1) % len(players)
         elif commands[c] == UI_TOKEN['UI_TOKEN_EXIT']:
             if yes_no("Bist du dir sicher?", ui):
+                curses.curs_set(1)
+                curses.echo()
+                ui.stdscr.clear()
+                ui.curs.refresh()
                 running = False
