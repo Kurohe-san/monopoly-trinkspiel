@@ -39,7 +39,7 @@ def action(f, player, players, properties):
             ui_command(["Du bist auf einem Geländefeld!","OK"],ui)
             index = int(f[1:])
             owned = properties[index].owner != None
-            ui_command([properties[index].output() + "; Besitzer: " + (properties[index].owner.name if owned else '- ') + Style.RESET_ALL+ f"; Preis: {properties[index].base_cost}$","OK"],ui)
+            ui_command([properties[index].output() + "; Besitzer: " + (properties[index].owner.name if owned else '- ') + f"; Preis: {properties[index].base_cost}$","OK"],ui)
 
             if not owned:
                 if yes_no("Kaufen?",ui):
@@ -96,7 +96,7 @@ def init():
     players = []
     for i in range(15):
         properties.append(Property.gen_street())
-    fields = ['' for i in range(25)]
+    fields = ['' for _ in range(25)]
     fields[0] = 'D'
     fields[13] = 'D'
     fields[3] = fields[6] = fields[9] = fields[12] = fields[15] = fields[18] = fields[21] = fields[24] = 'M'
