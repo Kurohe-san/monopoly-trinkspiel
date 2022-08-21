@@ -107,6 +107,8 @@ class UI:
         self.widthOwner = 8
         self.widthPlayers = 0
         self.widthCommand = 0
+        self.maxWidthCommand = 0
         self.startCommand = 0
+        self.minStartCommand = 0
         self.height,self.width = self.stdscr.getmaxyx()
         self.numberStreets = 0
