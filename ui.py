@@ -17,6 +17,7 @@ def ui_init():
     return (curs, stdscr)
 
 def ui_display(properties, players, ui):
+    ui.stdscr.clear()
     ui.numberStreets = len(properties)
     for i in range(ui.numberStreets):
         if len(properties[i].name) > ui.widthStreets:
