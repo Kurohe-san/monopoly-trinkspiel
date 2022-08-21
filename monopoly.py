@@ -1,8 +1,7 @@
 #!/usr/bin/python
 
 import random
-import time
-from colorama import Fore,Style
+#from colorama import Fore,Style
 from lib import *
 from ui import *
 
@@ -40,7 +39,7 @@ def action(f, player, players, properties):
             ui_command(["Du bist auf einem Geländefeld!","OK"],ui)
             index = int(f[1:])
             owned = properties[index].owner != None
-            ui_command([Fore.YELLOW + properties[index].output() + Style.RESET_ALL + "; Besitzer: " +Fore.GREEN+ (properties[index].owner.name if owned else '- ') + Style.RESET_ALL+ f"; Preis: {Fore.MAGENTA}{properties[index].base_cost}{Style.RESET_ALL}$","OK"],ui)
+            ui_command([properties[index].output() + "; Besitzer: " + (properties[index].owner.name if owned else '- ') + f"; Preis: {properties[index].base_cost}$","OK"],ui)
 
             if not owned:
                 if yes_no("Kaufen?",ui):
@@ -97,7 +96,7 @@ def init():
     players = []
     for i in range(15):
         properties.append(Property.gen_street())
-    fields = ['' for i in range(25)]
+    fields = ['' for _ in range(25)]
     fields[0] = 'D'
     fields[13] = 'D'
     fields[3] = fields[6] = fields[9] = fields[12] = fields[15] = fields[18] = fields[21] = fields[24] = 'M'
@@ -126,7 +125,6 @@ if __name__ == '__main__':
         # print(Fore.GREEN + players[cur_player].name + Style.RESET_ALL + " ist an der Reihe!")
         # if players[cur_player].credit < 0:
         #     print(Fore.RED+"ACHTUNG: Dein Kontostand ist negativ."+Style.RESET_ALL)
-      
 
         # Grafische Darstellung des Spielfeldes
         # print('')
@@ -142,11 +140,10 @@ if __name__ == '__main__':
 
         
         # c = input("GAME >> ")
-        c = ui_command([players[cur_player].name + " ist an der Reihe", "Würfeln", "Spielanleitung", "Beenden"],ui)
-        if c == 2:
-            pass
-        #     print("exit - Exit the game")
-        #     print("\n\n")
+        commands = [players[cur_player].name] + [UI_TOKEN['UI_TOKEN_ROLL'], UI_TOKEN['UI_TOKEN_RULES'], UI_TOKEN['UI_TOKEN_SAVE'], UI_TOKEN['UI_TOKEN_LOAD'], UI_TOKEN['UI_TOKEN_EXIT']]
+        c = ui_command(commands,ui)
+        if commands[c] == UI_TOKEN['UI_TOKEN_RULES']:
+            ui_command([RULES, "OK"])
         elif c == 1:
             w1 = random.randrange(1,6)
             w2 = random.randrange(1,6)
@@ -156,6 +153,6 @@ if __name__ == '__main__':
             ui_display(properties,players,ui)
             action(fields[p.field],p, players, properties)
             cur_player = (cur_player + 1) % len(players)
-        elif c == 3:
+        elif commands[c] == UI_TOKEN['UI_TOKEN_EXIT']:
             if yes_no("Bist du dir sicher?", ui):
                 running = False
