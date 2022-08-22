@@ -150,7 +150,7 @@ if __name__ == '__main__':
         c = ui_command(commands,ui)
         if commands[c] == UI_TOKEN['UI_TOKEN_RULES']:
             ui_command([RULES, "OK"], ui)
-        elif c == 1:
+        elif commands[c] == UI_TOKEN['UI_TOKEN_ROLL']:
             w1 = random.randrange(1,6)
             w2 = random.randrange(1,6)
             ui_command(["Du hast gewürfelt: " + str(w1) + " + " + str(w2), "OK"],ui)
@@ -166,3 +166,5 @@ if __name__ == '__main__':
                 ui.stdscr.clear()
                 ui.curs.refresh()
                 running = False
+        elif commands[c] == UI_TOKEN['UI_TOKEN_SAVE']:
+            save_data(players, properties, ui_input("Dateiname:", ui))
