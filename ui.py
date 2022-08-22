@@ -47,7 +47,7 @@ def ui_display(properties, players, ui):
             ui.widthPlayers = maxWidth
     ui.widthPlayers -= 1
 
-    ui.maxWidthCommand = ui.width - ui.widthStreets - ui.widthOwner - ui.widthPlayers - 4 - 100
+    ui.maxWidthCommand = ui.width - ui.widthStreets - ui.widthOwner - ui.widthPlayers - 4 - 50
     ui.minStartCommand = ui.width//2 - ui.maxWidthCommand//2
 
 
@@ -138,6 +138,13 @@ def ui_display(properties, players, ui):
             for i in range(widthField, ui.widthRent):
                 ui.curs.addstr(" ")
             ui.curs.addstr("│")
+        elif not i in {0, 3 ,6, 9, 12, 13, 15, 18, 21, 24}:
+            ui.curs.move(3 + i, ui.widthStreets + ui.widthOwner + 3)
+            ui.curs.addstr(str(properties[i - extra].base_cost) + "$")
+            widthField = len(str(properties[i - extra].base_cost) + "$")
+            for i in range(widthField, ui.widthRent):
+                ui.curs.addstr(" ")
+            ui.curs.addstr("│")   
         else:
             ui.curs.move(3 + i, ui.widthStreets + ui.widthOwner + 3)
             if i in {0, 3 ,6, 9, 12, 13, 15, 18, 21, 24}:

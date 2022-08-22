@@ -22,7 +22,11 @@ def action(f, player, players, properties):
             player.add(x)
         case 'D':
             ui_command(["IT'S TIME TO DUEL!!!1!!1!", "HELL YEAH!"],ui)
-            dp = players[ui_command(["Wähle einen Gegner aus:"]+list(map(lambda p: p.name, players)), ui)-1]
+            players_available = list(filter(lambda n: n != player and n.properties != [],players))
+            if players_available ==  []: 
+                ui_command(["Es stehen keine Spieler zur Auswahl", "OK"], ui)
+                return
+            dp = players_available[ui_command(["Wähle einen Gegner aus:"]+list(map(lambda p: p.name, players_available)), ui)-1]
 
             if dp.properties == []:
                 ui_command([f"{dp.name} hat keine Grundstücke. Abbruch...", "OK"],ui)
@@ -30,7 +34,7 @@ def action(f, player, players, properties):
             w = yes_no(f"Hat {player.name} gewonnen?",ui)
 
             played_property = random.choice(dp.properties)
-            ui_command(f"Es ging um {played_property.output()}!","OK")
+            ui_command([f"Es ging um {played_property.output()}!","OK"], ui)
             if w:
                 dp.properties.remove(played_property)
                 player.properties.append(played_property)
