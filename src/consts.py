@@ -25,3 +25,6 @@ REGELN:
     4. Spieler konnen auf Duell-Feldern andere Spieler herausfordern (abwechselnd trinken) und um ein Grundstück spielen.
 """
 
+SPECIAL_FIELDS = {0, 3, 6, 9, 12, 13, 15, 18, 21, 24}
+FIELD_SIZE = 25
+NUMBER_STREETS = 15

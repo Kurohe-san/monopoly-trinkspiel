@@ -37,14 +37,15 @@ def action(f, player, players, properties):
             if dp.properties == []:
                 ui_command([f"{dp.name} hat keine Grundstücke. Abbruch...", "OK"],ui)
                 return
+            played_property = random.choice(dp.properties)
             w = yes_no(f"Hat {player.name} gewonnen?",ui)
 
-            played_property = random.choice(dp.properties)
             ui_command([f"Es ging um {played_property.output()}!","OK"], ui)
             if w:
                 dp.properties.remove(played_property)
                 player.properties.append(played_property)
                 played_property.owner = player
+                ui_display(ui)
         case 'P':
             ui_command(["Du bist auf einem Grundstück!"],ui, False)
             index = int(f[1:])
@@ -81,19 +82,19 @@ def action(f, player, players, properties):
 
 
 def init():
-    properties = []
     players = []
-    for i in range(15):
-        properties.append(Property.gen_street())
+    properties = list(map(lambda _: Property.gen_street(), range(15)))
     fields = ['' for _ in range(25)]
-    fields[0] = 'D'
-    fields[13] = 'D'
-    fields[3] = fields[6] = fields[9] = fields[12] = fields[15] = fields[18] = fields[21] = fields[24] = 'M'
+    
     j = 0
-    for i in range(25):
-        if fields[i] == '':
+    for i in range(consts.FIELD_SIZE):
+        if i%13 == 0:
+            fields[i] = 'D'
+        elif i%3 == 0:
+            fields[i] = 'M'
+        else:
             fields[i] = 'P'+str(j)
-            j+=1
+            j += 1
 
     ui = UI()
 
@@ -136,7 +137,14 @@ if __name__ == '__main__':
         
         # c = input("GAME >> ")
         ui_delete_saved_commands(ui)
-        commands = [players[cur_player].name] + [UI_TOKEN['UI_TOKEN_ROLL'], UI_TOKEN['UI_TOKEN_RULES'], UI_TOKEN['UI_TOKEN_SAVE'], UI_TOKEN['UI_TOKEN_LOAD'], UI_TOKEN['UI_TOKEN_EXIT']]
+        commands = [players[cur_player].name] + [
+                    UI_TOKEN['UI_TOKEN_ROLL'], 
+                    UI_TOKEN['UI_TOKEN_RULES'], 
+                    UI_TOKEN['UI_TOKEN_SAVE'], 
+                    UI_TOKEN['UI_TOKEN_LOAD'], 
+                    UI_TOKEN['UI_TOKEN_EXIT']
+                ]
+
         c = ui_command(commands,ui)
 
         if commands[c] == UI_TOKEN['UI_TOKEN_RULES']:

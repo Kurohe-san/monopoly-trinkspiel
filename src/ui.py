@@ -1,8 +1,6 @@
-import imp
 import re
 import consts
 import curses
-from glob import glob
 from lib import *
 
 def ui_init():
@@ -22,60 +20,46 @@ def ui_init():
     return (curs, stdscr)
 
 def ui_display(properties, players, ui):
+
     ui.stdscr.clear()
-    ui.number_streets = len(properties)
-    for i in range(ui.number_streets):
-        if len(properties[i].name) > ui.width_streets:
-            ui.width_streets = len(properties[i].name)
     
-    #width owner
-    ui.width_owner = 8
-    for p in properties:
-        if p.owner != None and ui.width_owner < len(p.owner.name):
-            ui.width_owner = len(p.owner.name)
+    # Maximale Breite eines Straßennamens
+    ui.width_streets = max(map(lambda p: len(p.name), properties))
+    
+    # Maximale Breite eines Spielernamens
+    ui.width_owner = max(list(map(lambda p: len(p.name), players)) + [8])
 
-    #width rent
-    ui.width_rent = 5
-    if ui.width_rent < max(list(map(lambda s: len(s), consts.DRINKS))):
-        ui.width_rent = len(p)
+    # Maximale Breite der Miete
+    ui.width_rent = max(list(map(lambda s: len(s), consts.DRINKS)) + [5])
 
-    #width players
+    # Maximale Breite einer Zeile zum Anzeigen von Spielern
     ui.number_players = len(players)
-    ui.width_players = 8
-    for i in range(ui.number_streets + 10):
-        max_width = 0
-        for p in players:
-            if p.field == i:
-                max_width += 1 + len(p.name)
-        if max_width > ui.width_players:
-            ui.width_players = max_width
-    ui.width_players -= 1
+    ui.width_players = max(list(map(lambda pr: sum(map(lambda fpl: len(fpl.name)+1, filter(lambda pl: pl.field == properties.index(pr), players))) - 1, properties)) + [8])
 
     ui.max_width_command = ui.width - ui.width_streets - ui.width_owner - ui.width_rent - ui.width_players - 5
     ui.min_start_command = ui.width_streets + ui.width_owner + ui.width_rent + ui.width_players + 5
 
 
-    #add streets
+    # Spalte: Straßenname
     ui.curs.addstr(0, 0, "┌")
     ui.curs.addstr(0, ui.width_streets + 1, "┬")
     ui.curs.addstr(1,0, "│Straßen")
-    for i in range(ui.width_streets - 7):
-        ui.curs.addstr(" ")
+    ui.curs.addstr(" " * (ui.width_streets - 7))
     ui.curs.addstr(1, 0, "│")
     ui.curs.addstr(1, ui.width_streets + 1, "│")
     ui.curs.addstr(2, 0, "├")
     ui.curs.addstr(2, ui.width_streets + 1, "┼")
-    ui.curs.addstr(ui.number_streets + 13, 0, "└")
-    ui.curs.addstr(ui.number_streets + 13, ui.width_streets + 1, "┴")
-    for i in range(ui.width_streets):
-        ui.curs.addstr(0, i + 1, "─")
-        ui.curs.addstr(2, i + 1, "─")
-        ui.curs.addstr(ui.number_streets + 13, i + 1, "─")
+    ui.curs.addstr(consts.NUMBER_STREETS + 13, 0, "└")
+    ui.curs.addstr(consts.NUMBER_STREETS + 13, ui.width_streets + 1, "┴")
+    ui.curs.addstr(0, 1, "─" * (ui.width_streets))
+    ui.curs.addstr(2, 1, "─" * (ui.width_streets))
+    ui.curs.addstr(consts.NUMBER_STREETS + 13, 1, "─" * (ui.width_streets))
+    
     extra = 0
-    for i in range(ui.number_streets + 10):
+    for i in range(consts.FIELD_SIZE):
         ui.curs.move(3 + i, 0)
         ui.curs.addstr("│")
-        if not i in {0, 3 ,6, 9, 12, 13, 15, 18, 21, 24}:
+        if not i in consts.SPECIAL_FIELDS:
             ui.curs.addstr(properties[i - extra].name)
             width_field = len(properties[i - extra].name)
         elif i in {0, 13}:
@@ -86,102 +70,90 @@ def ui_display(properties, players, ui):
             ui.curs.addstr("Geld")
             width_field = 4
             extra += 1
-        for i in range(ui.width_streets - width_field):
-            ui.curs.addstr(" ")
+        ui.curs.addstr(" " * (ui.width_streets - width_field))
         ui.curs.addstr("│")
 
-    #add owner
+    # Spalte: Besitzer
     ui.curs.addstr(0, ui.width_streets + ui.width_owner + 2, "┬")
     ui.curs.addstr(1, ui.width_streets + 1, "│Besitzer")
-    for i in range(ui.width_owner - 8):
-        ui.curs.addstr(" ")
+    ui.curs.addstr(" " * (ui.width_owner - 8))
     ui.curs.addstr(1, ui.width_streets + ui.width_owner + 2, "│")
     ui.curs.addstr(2, ui.width_streets + ui.width_owner + 2, "┼")
-    ui.curs.addstr(ui.number_streets + 13, ui.width_streets + ui.width_owner + 2, "┴")
-    for i in range(ui.width_owner):
-        ui.curs.addstr(0, ui.width_streets + i + 2, "─")
-        ui.curs.addstr(2, ui.width_streets + i + 2, "─")
-        ui.curs.addstr(ui.number_streets + 13, ui.width_streets + i + 2, "─")
+    ui.curs.addstr(consts.NUMBER_STREETS + 13, ui.width_streets + ui.width_owner + 2, "┴")
+    ui.curs.addstr(0, ui.width_streets + 2, "─" * ui.width_owner)
+    ui.curs.addstr(2, ui.width_streets + 2, "─" * ui.width_owner)
+    ui.curs.addstr(consts.NUMBER_STREETS + 13, ui.width_streets + 2, "─" * ui.width_owner)
+   
     extra = 0
-    for i in range(ui.number_streets + 10):
-        if not i in {0, 3 ,6, 9, 12, 13, 15, 18, 21, 24}:
+    for i in range(consts.FIELD_SIZE):
+        if not i in consts.SPECIAL_FIELDS:
             ui.curs.move(3 + i, ui.width_streets + 2)
             if properties[i - extra].owner != None:
                 ui.curs.addstr(properties[i - extra].owner.name)
                 width_field = len(properties[i - extra].owner.name)
             else:
                 width_field = 0
-            for i in range(width_field, ui.width_owner):
-                ui.curs.addstr(" ")
+            ui.curs.addstr(" " * (ui.width_owner - width_field))
             ui.curs.addstr("│")
         else:
             ui.curs.move(3 + i, ui.width_streets + 2)
             extra += 1
-            for i in range(0, ui.width_owner):
-                ui.curs.addstr(" ")
+            ui.curs.addstr(" " * ui.width_owner)
             ui.curs.addstr("│")
 
-    #add rent
+    # Spalte: Miete
     ui.curs.addstr(0, ui.width_streets + ui.width_owner + ui.width_rent + 3, "┬")
     ui.curs.addstr(1, ui.width_streets + ui.width_owner + 2, "│Miete")
-    for i in range(ui.width_rent - 5):
-        ui.curs.addstr(" ")
+    ui.curs.addstr(" " * (ui.width_rent - 5))
     ui.curs.addstr(1, ui.width_streets + ui.width_owner + ui.width_rent + 3, "│")
     ui.curs.addstr(2, ui.width_streets + ui.width_owner + ui.width_rent + 3, "┼")
-    ui.curs.addstr(ui.number_streets + 13, ui.width_streets + ui.width_owner + ui.width_rent + 3, "┴")
-    for i in range(ui.width_rent):
-        ui.curs.addstr(0, ui.width_streets + ui.width_owner + i + 3, "─")
-        ui.curs.addstr(2, ui.width_streets + ui.width_owner + i + 3, "─")
-        ui.curs.addstr(ui.number_streets + 13, ui.width_streets + ui.width_owner + i + 3, "─")
+    ui.curs.addstr(consts.NUMBER_STREETS + 13, ui.width_streets + ui.width_owner + ui.width_rent + 3, "┴")
+    ui.curs.addstr(0, ui.width_streets + ui.width_owner + 3, "─" * ui.width_rent)
+    ui.curs.addstr(2, ui.width_streets + ui.width_owner + 3, "─" * ui.width_rent)
+    ui.curs.addstr(consts.NUMBER_STREETS + 13, ui.width_streets + ui.width_owner + 3, "─" * ui.width_rent)
+
     extra = 0
-    for i in range(ui.number_streets + 10):
-        if (not i in {0, 3 ,6, 9, 12, 13, 15, 18, 21, 24}) and (properties[i - extra].owner != None):
+    for i in range(consts.FIELD_SIZE):
+        if (not i in consts.SPECIAL_FIELDS) and (properties[i - extra].owner != None):
             ui.curs.move(3 + i, ui.width_streets + ui.width_owner + 3)
             ui.curs.addstr(consts.DRINKS[properties[i - extra].rent])
             width_field = len(consts.DRINKS[properties[i - extra].rent])
-            for i in range(width_field, ui.width_rent):
-                ui.curs.addstr(" ")
+            ui.curs.addstr(" " * (ui.width_rent - width_field))
             ui.curs.addstr("│")
-        elif not i in {0, 3 ,6, 9, 12, 13, 15, 18, 21, 24}:
+        elif not i in consts.SPECIAL_FIELDS:
             ui.curs.move(3 + i, ui.width_streets + ui.width_owner + 3)
             ui.curs.addstr(str(properties[i - extra].base_cost) + "$")
             width_field = len(str(properties[i - extra].base_cost) + "$")
-            for i in range(width_field, ui.width_rent):
-                ui.curs.addstr(" ")
+            ui.curs.addstr(" " * (ui.width_rent - width_field))
             ui.curs.addstr("│")   
         else:
             ui.curs.move(3 + i, ui.width_streets + ui.width_owner + 3)
-            if i in {0, 3 ,6, 9, 12, 13, 15, 18, 21, 24}:
+            if i in consts.SPECIAL_FIELDS:
                 extra += 1
-            for i in range(0, ui.width_rent):
-                ui.curs.addstr(" ")
+            ui.curs.addstr(" " * ui.width_rent)
             ui.curs.addstr("│")
 
-    #add players
+    # Spalte: Spielerposition
     ui.curs.addstr(0, ui.width_streets + ui.width_owner + ui.width_rent + ui.width_players + 4, "┐")
     ui.curs.addstr(1, ui.width_streets + ui.width_owner + ui.width_rent + 4, "Spieler")
-    for i in range(ui.width_owner - 8):
-        ui.curs.addstr(" ")
+    ui.curs.addstr(" " * (ui.width_owner - 8))
     ui.curs.addstr(1, ui.width_streets + ui.width_owner + ui.width_rent + ui.width_players + 4, "│")
     ui.curs.addstr(2, ui.width_streets + ui.width_owner + ui.width_rent + ui.width_players + 4, "┤")
-    ui.curs.addstr(ui.number_streets + 13, ui.width_streets + ui.width_owner + ui.width_rent + ui.width_players + 4, "┘")
-    for i in range(ui.width_players):
-        ui.curs.addstr(0, ui.width_streets + ui.width_owner + ui.width_rent + i  + 4, "─")
-        ui.curs.addstr(2, ui.width_streets + ui.width_owner + ui.width_rent + i  + 4, "─")
-        ui.curs.addstr(ui.number_streets + 13, ui.width_streets + ui.width_owner + ui.width_rent + i + 4, "─")
+    ui.curs.addstr(consts.NUMBER_STREETS + 13, ui.width_streets + ui.width_owner + ui.width_rent + ui.width_players + 4, "┘")
+    ui.curs.addstr(0, ui.width_streets + ui.width_owner + ui.width_rent + 4, "─" * ui.width_players)
+    ui.curs.addstr(2, ui.width_streets + ui.width_owner + ui.width_rent + 4, "─" * ui.width_players)
+    ui.curs.addstr(consts.NUMBER_STREETS + 13, ui.width_streets + ui.width_owner + ui.width_rent + 4, "─" * ui.width_players)
 
-    for i in range(0, ui.number_streets + 10):
+    for i in range(consts.FIELD_SIZE):
         ui.curs.move(3 + i, ui.width_streets + ui.width_owner + ui.width_rent + 4)
         width_field = 1
-        for p in players:
-            if p.field == i:
-                if width_field > 1:
-                    ui.curs.addstr(" ")
-                    width_field += 1
-                ui.curs.addstr(p.name)
-                width_field += len(p.name)
-        for i in range(width_field - 1, ui.width_players):
-            ui.curs.addstr(" ")
+        for p in filter(lambda pf: pf.field == i,players):
+            if width_field > 1:
+                ui.curs.addstr(" ")
+                width_field += 1
+            ui.curs.addstr(p.name)
+            width_field += len(p.name)
+        ui.curs.addstr(" " * (ui.width_players - width_field + 1))
         ui.curs.addstr("│")
     ui.curs.refresh()
 
@@ -242,7 +214,7 @@ def ui_command(array, ui, delete=True):
     
     #ui.curs.move(1 + ui.height_offset, ui.start_command + (ui.width_command - len(array[0])) // 2)
     #ui.curs.addstr(array[0])
-    __ui_print_Color__(1 + ui.height_offset, ui.start_command + (ui.width_command - __ui_len_colored_text__(array[0])) // 2,array[0], ui)
+    __ui_print_color__(1 + ui.height_offset, ui.start_command + (ui.width_command - __ui_len_colored_text__(array[0])) // 2,array[0], ui)
     if len(array) == 1:
         ui.height_offset += 4
         ui.saved_commands.append(array[0])
@@ -342,32 +314,32 @@ def ui_input(question, ui):
     ui.curs.refresh()
     return input
 
-def __ui_print_Color__(y, x, text, ui):
-    splitedText = re.split('(\§)', text)
+def __ui_print_color__(y, x, text, ui):
+    split_text = re.split('(\§)', text)
     ui.curs.move(y, x)
     i = 0
-    while i < len(splitedText):
-        if splitedText[i] == "§":
-            if splitedText[i + 1] == "1":
-                ui.curs.addstr(splitedText[i + 3], curses.color_pair(4))
-            if splitedText[i + 1] == "2":
-                ui.curs.addstr(splitedText[i + 3], curses.color_pair(5))
-            if splitedText[i + 1] == "3":
-                ui.curs.addstr(splitedText[i + 3], curses.color_pair(6))
+    while i < len(split_text):
+        if split_text[i] == "§":
+            if split_text[i + 1] == "1":
+                ui.curs.addstr(split_text[i + 3], curses.color_pair(4))
+            if split_text[i + 1] == "2":
+                ui.curs.addstr(split_text[i + 3], curses.color_pair(5))
+            if split_text[i + 1] == "3":
+                ui.curs.addstr(split_text[i + 3], curses.color_pair(6))
             i += 4
         else:
-            ui.curs.addstr(splitedText[i], curses.color_pair(3))
+            ui.curs.addstr(split_text[i], curses.color_pair(3))
             i += 1
 
 def __ui_len_colored_text__(text):
-    splitedText = re.split('(\§)', text)
+    split_text = re.split('(\§)', text)
     i = 0
     result = 0
-    while i < len(splitedText):
-        if splitedText[i] == "§":
-            result += len(splitedText[i + 3].encode('utf-16-le')) // 2
+    while i < len(split_text):
+        if split_text[i] == "§":
+            result += len(split_text[i + 3].encode('utf-16-le')) // 2
             i += 4
         else:
-            result += len(splitedText[i].encode('utf-16-le')) // 2
+            result += len(split_text[i].encode('utf-16-le')) // 2
             i += 1
     return result
