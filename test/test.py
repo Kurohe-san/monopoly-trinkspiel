@@ -1,4 +1,4 @@
-from ui import *
+from ../scr/ui import *
 
 ui_init(["test","test2"], ["Henri", "Michael"])
 ui_command(["Henri ist an der Reihe", "Würfeln", "Anleitung"])

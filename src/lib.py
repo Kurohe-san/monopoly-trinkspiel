@@ -3,6 +3,7 @@ import names
 from ui import ui_command, ui_init
 import json
 import consts
+import time
 
 # Gewöhnliches UI-Element, dass Auswahl zwischen Ja und Nein ermöglicht. Gibt True zurück für zweite Wahlmöglichkeit.
 def yes_no(query,ui,yes_first=False, delete=True, yes_token="Ja", no_token="Nein"):

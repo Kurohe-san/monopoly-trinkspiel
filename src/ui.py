@@ -1,6 +1,9 @@
+import imp
+import re
 import consts
 import curses
 from glob import glob
+from lib import *
 
 def ui_init():
     curs = curses.initscr()
@@ -11,6 +14,10 @@ def ui_init():
     curses.use_default_colors()
     curses.init_pair(1, 11, -1)
     curses.init_pair(2, 0, 7)
+    curses.init_pair(3, curses.COLOR_WHITE, -1)     #color 0: default
+    curses.init_pair(4, curses.COLOR_RED, -1)       #color 1: red
+    curses.init_pair(5, curses.COLOR_BLUE, -1)      #color 2: blue
+    curses.init_pair(6, curses.COLOR_GREEN, -1)     #color 3: green
     stdscr = curses.initscr()
     return (curs, stdscr)
 
@@ -192,7 +199,7 @@ def ui_command(array, ui, delete=True):
     #print box
     ui.width_command = 0
     for a in array:
-        len_a = len(a.encode('utf-16-le')) // 2
+        len_a = __ui_len_colored_text__(a)
         if len_a > ui.width_command and len_a + 2 <= ui.max_width_command:
             ui.width_command = len_a + 2
     for a in ui.saved_commands:
@@ -233,8 +240,9 @@ def ui_command(array, ui, delete=True):
 
     selected_answerer = 1
     
-    ui.curs.move(1 + ui.height_offset, ui.start_command + (ui.width_command - len(array[0])) // 2)
-    ui.curs.addstr(array[0])
+    #ui.curs.move(1 + ui.height_offset, ui.start_command + (ui.width_command - len(array[0])) // 2)
+    #ui.curs.addstr(array[0])
+    __ui_print_Color__(1 + ui.height_offset, ui.start_command + (ui.width_command - __ui_len_colored_text__(array[0])) // 2,array[0], ui)
     if len(array) == 1:
         ui.height_offset += 4
         ui.saved_commands.append(array[0])
@@ -333,3 +341,33 @@ def ui_input(question, ui):
             ui.curs.addstr(i, ui.start_command + j, " ")
     ui.curs.refresh()
     return input
+
+def __ui_print_Color__(y, x, text, ui):
+    splitedText = re.split('(\§)', text)
+    ui.curs.move(y, x)
+    i = 0
+    while i < len(splitedText):
+        if splitedText[i] == "§":
+            if splitedText[i + 1] == "1":
+                ui.curs.addstr(splitedText[i + 3], curses.color_pair(4))
+            if splitedText[i + 1] == "2":
+                ui.curs.addstr(splitedText[i + 3], curses.color_pair(5))
+            if splitedText[i + 1] == "3":
+                ui.curs.addstr(splitedText[i + 3], curses.color_pair(6))
+            i += 4
+        else:
+            ui.curs.addstr(splitedText[i], curses.color_pair(3))
+            i += 1
+
+def __ui_len_colored_text__(text):
+    splitedText = re.split('(\§)', text)
+    i = 0
+    result = 0
+    while i < len(splitedText):
+        if splitedText[i] == "§":
+            result += len(splitedText[i + 3].encode('utf-16-le')) // 2
+            i += 4
+        else:
+            result += len(splitedText[i].encode('utf-16-le')) // 2
+            i += 1
+    return result
