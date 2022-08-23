@@ -1,2 +1,2 @@
 run:
-	python monopoly.py
+	python src/monopoly.py

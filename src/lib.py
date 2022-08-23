@@ -96,7 +96,7 @@ class Property:
             c = 6
         else:
             c = 7
-        name = names.get_full_name().replace(' ','-')+'-'+random.choice(['Street','Boulevard','Avenue'])
+        name = names.get_last_name()+'-'+random.choice(['Street','Boulevard','Avenue'])
         return Property(name,x,c)
 
     def to_dict(self, players):
