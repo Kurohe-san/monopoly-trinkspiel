@@ -30,7 +30,7 @@ REGELN:
     4. Spieler konnen auf Duell-Feldern andere Spieler herausfordern (abwechselnd trinken) und um ein Grundstück spielen.
 """
 
-def yes_no(query,ui,yes_first=False):
+def yes_no(query,ui,yes_first=False, delete=True):
     return ui_command([query] + (["Ja","Nein"] if yes_first else ["Nein","Ja"]),ui, False) == 2
 
 def gen_money_card():
@@ -150,4 +150,5 @@ class UI:
         self.height,self.width = self.stdscr.getmaxyx()
         self.numberStreets = 0
         self.heightOffset = 0
+        self.heightOffsetAnswerers = 0
         self.savedCommands = []

@@ -262,6 +262,7 @@ def ui_command(array, ui, delete=True):
             else:
                 ui.heightOffset += 4
                 ui.savedCommands.append(array[0])
+                ui.heightOffsetAnswerers = len(array) + 1
             return selectedAnswerer
 
 
@@ -288,7 +289,14 @@ def __print_saved_Commands__(ui):
                 ui.curs.addstr(0 + i * 4, ui.startCommand + j + 1, "─")
                 ui.curs.addstr(2 + i * 4, ui.startCommand + j + 1, "─")
             ui.curs.addstr(1 + i * 4, ui.startCommand + (ui.widthCommand - len(ui.savedCommands[i])) // 2, ui.savedCommands[i])
-            
+
+def ui_deleteSavedCommands(ui):
+    for i in range(ui.heightOffset + ui.heightOffsetAnswerers):
+        for j in range(ui.widthCommand):
+            ui.curs.addstr(i, ui.startCommand + j, " ")
+    ui.curs.refresh()
+    ui.heightOffset = 0
+    ui.savedCommands = []     
 
 def ui_input(question, ui):
 

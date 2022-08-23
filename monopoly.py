@@ -46,7 +46,7 @@ def action(f, player, players, properties):
             ui_command([properties[index].output() + "; Besitzer: " + (properties[index].owner.name if owned else '- ') + f"; Preis: {properties[index].base_cost}$"],ui, False)
 
             if not owned:
-                if yes_no("Kaufen?",ui):
+                if yes_no("Kaufen?",ui, False, False):
                     if yes_no(f"Will jemand {player.name} herausfordern?",ui):
                         if challenge(player.credit, properties[index].base_cost, ui):
                             properties[index].buy(player)
@@ -150,6 +150,7 @@ if __name__ == '__main__':
 
         
         # c = input("GAME >> ")
+        ui_deleteSavedCommands(ui)
         commands = [players[cur_player].name] + [UI_TOKEN['UI_TOKEN_ROLL'], UI_TOKEN['UI_TOKEN_RULES'], UI_TOKEN['UI_TOKEN_SAVE'], UI_TOKEN['UI_TOKEN_LOAD'], UI_TOKEN['UI_TOKEN_EXIT']]
         c = ui_command(commands,ui)
         if commands[c] == UI_TOKEN['UI_TOKEN_RULES']:
