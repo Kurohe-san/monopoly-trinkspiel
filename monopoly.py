@@ -4,6 +4,7 @@ import random
 #from colorama import Fore,Style
 from lib import *
 from ui import *
+from consts import UI_TOKEN, RULES
 
 """
 AKTIONEN:
@@ -12,6 +13,11 @@ AKTIONEN:
 
 """
 
+
+# Aktionen die auf Feldern ausgeführt werden:
+# 'M': Geld-Feld -- eine Geldkarte ziehen
+# 'D': Duell-Felds -- ein Duell ausführen und Gewinner angeben
+# 'P<n>': Ein Grundstück mit index n in der properties liste
 def action(f, player, players, properties):
     match f[0]:
         case 'M':
@@ -40,7 +46,7 @@ def action(f, player, players, properties):
                 player.properties.append(played_property)
                 played_property.owner = player
         case 'P':
-            ui_command(["Du bist auf einem Geländefeld!"],ui, False)
+            ui_command(["Du bist auf einem Grundstück!"],ui, False)
             index = int(f[1:])
             owned = properties[index].owner != None
             ui_command([properties[index].output() + "; Besitzer: " + (properties[index].owner.name if owned else '- ') + f"; Preis: {properties[index].base_cost}$"],ui, False)
@@ -67,33 +73,12 @@ def action(f, player, players, properties):
                 if yes_no("Abkaufen (statt saufen)?",ui):
                     if yes_no(f"Will {properties[index].owner.name} {player.name} herausfordern?",ui):
                         if challenge(player.credit, properties[index].base_cost, ui, 2):
-                            transfer_property(properties[index].owner, player, properties[index], ui)
+                            properties[index].owner.transfer_property(player, properties[index], ui)
                     else:
-                        transfer_property(properties[index].owner, player, properties[index], ui)
+                        properties[index].owner.transfer_property(player, properties[index], ui)
                     ui_display(properties,players,ui)
                 return
 
-
-def transfer_property(old, new, prop,ui):
-    x=random.randrange(10)
-    if x<3:
-        ui_command(["Du MUSST den Preis bezahlen (ohne, dass du es kriegst)...","😢"],ui)
-        new.remove(prop.base_cost)
-        return
-    elif x<6:
-        ui_command(["Du MUSST für den doppelten Preis kaufen...","😵"],ui)
-        new.remove(prop.base_cost * 2)
-        old.add(prop.base_cost)
-    elif x<10:
-        ui_command(["Du MUSST für den normalen Preis kaufen...","😌"],ui)
-        new.remove(prop.base_cost)
-        old.add(prop.base_cost)
-    else:
-        ui_command(["Die Götter lieben dich! Du kriegst es kostenlos.","😎"],ui)
-
-    old.properties.append(prop)
-    new.properties.append(prop)
-    prop.owner = new
 
 def init():
     properties = []
@@ -150,9 +135,10 @@ if __name__ == '__main__':
 
         
         # c = input("GAME >> ")
-        ui_deleteSavedCommands(ui)
+        ui_delete_saved_commands(ui)
         commands = [players[cur_player].name] + [UI_TOKEN['UI_TOKEN_ROLL'], UI_TOKEN['UI_TOKEN_RULES'], UI_TOKEN['UI_TOKEN_SAVE'], UI_TOKEN['UI_TOKEN_LOAD'], UI_TOKEN['UI_TOKEN_EXIT']]
         c = ui_command(commands,ui)
+
         if commands[c] == UI_TOKEN['UI_TOKEN_RULES']:
             ui_command([RULES, "OK"], ui)
         elif commands[c] == UI_TOKEN['UI_TOKEN_ROLL']:
@@ -173,3 +159,8 @@ if __name__ == '__main__':
                 running = False
         elif commands[c] == UI_TOKEN['UI_TOKEN_SAVE']:
             save_data(players, properties, ui_input("Dateiname:", ui))
+        elif commands[c] == UI_TOKEN['UI_TOKEN_LOAD']:
+            if yes_no("Bist du sicher? (Laufende Spieldaten gehen verloren)", ui):
+                ui_delete_saved_commands(ui)
+                players, properties = load_data(ui_input("Dateiname:", ui))
+                ui_display(properties, players, ui)
