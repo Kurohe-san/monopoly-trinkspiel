@@ -47,8 +47,8 @@ def ui_display(properties, players, ui):
             ui.widthPlayers = maxWidth
     ui.widthPlayers -= 1
 
-    ui.maxWidthCommand = ui.width - ui.widthStreets - ui.widthOwner - ui.widthPlayers - 4 - 50
-    ui.minStartCommand = ui.width//2 - ui.maxWidthCommand//2
+    ui.maxWidthCommand = ui.width - ui.widthStreets - ui.widthOwner - ui.widthRent - ui.widthPlayers - 5
+    ui.minStartCommand = ui.widthStreets + ui.widthOwner + ui.widthRent + ui.widthPlayers + 5
 
 
     #add streets
@@ -182,9 +182,15 @@ def ui_display(properties, players, ui):
     ui.curs.refresh()
 
 
-def ui_command(array, ui):
-    if len(array) < 2:
+def ui_command(array, ui, delete=True):
+    if len(array) < 1:
         return -1
+
+    #clear
+    if ui.savedCommands != []:
+        for i in range(len(ui.savedCommands)*4 + 2):
+            for j in range(ui.widthCommand):
+                ui.curs.addstr(i, ui.startCommand + j, " ")
 
     #print box
     ui.widthCommand = 0
@@ -192,28 +198,50 @@ def ui_command(array, ui):
         lenA = len(a.encode('utf-16-le')) // 2
         if lenA > ui.widthCommand and lenA + 2 <= ui.maxWidthCommand:
             ui.widthCommand = lenA + 2
+    for a in ui.savedCommands:
+        lenA = len(a.encode('utf-16-le')) // 2
+        if lenA > ui.widthCommand and lenA + 2 <= ui.maxWidthCommand:
+            ui.widthCommand = lenA + 2
     ui.startCommand = ui.minStartCommand + (ui.maxWidthCommand - ui.widthCommand) // 2
 
-    ui.curs.addstr(0, ui.startCommand, "┌")
-    ui.curs.addstr(0, ui.startCommand + ui.widthCommand - 1, "┐")
-    ui.curs.addstr(len(array) + 2, ui.startCommand, "└")
-    ui.curs.addstr(len(array) + 2, ui.startCommand + ui.widthCommand - 1, "┘")
-    for i in range(ui.widthCommand - 2):
-        ui.curs.addstr(0, ui.startCommand + i + 1, "─")
-        ui.curs.addstr(2, ui.startCommand + i + 1, "─")
-        ui.curs.addstr(len(array) + 2, ui.startCommand + i + 1, "─")
-    for i in range(len(array) + 1):
-        if i == 1:
-            ui.curs.addstr(i + 1, ui.startCommand, "├")
-            ui.curs.addstr(i + 1, ui.startCommand + ui.widthCommand - 1, "┤")
-        else:
-            ui.curs.addstr(i + 1, ui.startCommand, "│")
-            ui.curs.addstr(i + 1, ui.startCommand + ui.widthCommand - 1, "│")
+    if len(array) > 1:
+        ui.curs.addstr(0 + ui.heightOffset, ui.startCommand, "┌")
+        ui.curs.addstr(0 + ui.heightOffset, ui.startCommand + ui.widthCommand - 1, "┐")
+        ui.curs.addstr(len(array) + 2 + ui.heightOffset, ui.startCommand, "└")
+        ui.curs.addstr(len(array) + 2 + ui.heightOffset, ui.startCommand + ui.widthCommand - 1, "┘")
+        for i in range(ui.widthCommand - 2):
+            ui.curs.addstr(0 + ui.heightOffset, ui.startCommand + i + 1, "─")
+            ui.curs.addstr(2 + ui.heightOffset, ui.startCommand + i + 1, "─")
+            ui.curs.addstr(len(array) + 2 + ui.heightOffset, ui.startCommand + i + 1, "─")
+        for i in range(len(array) + 1):
+            if i == 1:
+                ui.curs.addstr(i + 1 + ui.heightOffset, ui.startCommand, "├")
+                ui.curs.addstr(i + 1 + ui.heightOffset, ui.startCommand + ui.widthCommand - 1, "┤")
+            else:
+                ui.curs.addstr(i + 1 + ui.heightOffset, ui.startCommand, "│")
+                ui.curs.addstr(i + 1 + ui.heightOffset, ui.startCommand + ui.widthCommand - 1, "│")
+    else:
+        ui.curs.addstr(0 + ui.heightOffset, ui.startCommand, "┌")
+        ui.curs.addstr(0 + ui.heightOffset, ui.startCommand + ui.widthCommand - 1, "┐")
+        ui.curs.addstr(2 + ui.heightOffset, ui.startCommand, "└")
+        ui.curs.addstr(2 + ui.heightOffset, ui.startCommand + ui.widthCommand - 1, "┘")
+        for i in range(ui.widthCommand - 2):
+            ui.curs.addstr(0 + ui.heightOffset, ui.startCommand + i + 1, "─")
+            ui.curs.addstr(2 + ui.heightOffset, ui.startCommand + i + 1, "─")
+            ui.curs.addstr(1 + ui.heightOffset, ui.startCommand, "│")
+            ui.curs.addstr(1 + ui.heightOffset, ui.startCommand + ui.widthCommand - 1, "│")
+
+    #print saved Commands
+    __print_saved_Commands__(ui)
 
     selectedAnswerer = 1
     
-    ui.curs.move(1, ui.startCommand + (ui.widthCommand - len(array[0])) // 2)
+    ui.curs.move(1 + ui.heightOffset, ui.startCommand + (ui.widthCommand - len(array[0])) // 2)
     ui.curs.addstr(array[0])
+    if len(array) == 1:
+        ui.heightOffset += 4
+        ui.savedCommands.append(array[0])
+        return 0
     while True:
         __print_answerers__(array, selectedAnswerer, ui)
         input = ui.stdscr.getch()
@@ -224,16 +252,22 @@ def ui_command(array, ui):
             if selectedAnswerer < len(array) - 1:
                 selectedAnswerer += 1
         elif input == 10:
-            for i in range(len(array) + 3):
-                for j in range(ui.widthCommand):
-                    ui.curs.addstr(i, ui.startCommand + j, " ")
-            ui.curs.refresh()
+            if delete:
+                for i in range(len(array) + 3 + ui.heightOffset):
+                    for j in range(ui.widthCommand):
+                        ui.curs.addstr(i, ui.startCommand + j, " ")
+                ui.curs.refresh()
+                ui.heightOffset = 0
+                ui.savedCommands = []
+            else:
+                ui.heightOffset += 4
+                ui.savedCommands.append(array[0])
             return selectedAnswerer
 
 
 def __print_answerers__(array, selectedAnswerer,ui):
     for i in range(1, len(array)):
-        ui.curs.move(2 + i, ui.startCommand + (ui.widthCommand - len(array[i])) // 2)
+        ui.curs.move(2 + i + ui.heightOffset, ui.startCommand + (ui.widthCommand - len(array[i])) // 2)
         if i == selectedAnswerer:
             ui.curs.addstr(array[i], curses.color_pair(2))
             curses.use_default_colors()
@@ -241,6 +275,20 @@ def __print_answerers__(array, selectedAnswerer,ui):
             ui.curs.addstr(array[i])
     ui.curs.refresh()
 
+def __print_saved_Commands__(ui):
+    if len(ui.savedCommands) != 0:
+        for i in range(len(ui.savedCommands)):
+            ui.curs.addstr(0 + i * 4, ui.startCommand, "┌")
+            ui.curs.addstr(0 + i * 4, ui.startCommand + ui.widthCommand - 1, "┐")
+            ui.curs.addstr(1 + i * 4, ui.startCommand, "│")
+            ui.curs.addstr(1 + i * 4, ui.startCommand + ui.widthCommand - 1, "│")
+            ui.curs.addstr(2 + i * 4, ui.startCommand, "└")
+            ui.curs.addstr(2 + i * 4, ui.startCommand + ui.widthCommand - 1, "┘")
+            for j in range(ui.widthCommand - 2):
+                ui.curs.addstr(0 + i * 4, ui.startCommand + j + 1, "─")
+                ui.curs.addstr(2 + i * 4, ui.startCommand + j + 1, "─")
+            ui.curs.addstr(1 + i * 4, ui.startCommand + (ui.widthCommand - len(ui.savedCommands[i])) // 2, ui.savedCommands[i])
+            
 
 def ui_input(question, ui):
 

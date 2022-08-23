@@ -15,13 +15,13 @@ AKTIONEN:
 def action(f, player, players, properties):
     match f[0]:
         case 'M':
-            ui_command(["Du bist auf einem Geld-Feld!", "OK"],ui)
+            ui_command(["Du bist auf einem Geld-Feld!"],ui)
             #time.sleep(1)
             x = gen_money_card()
             ui_command([f"Die Geldkarte enthält... {x}$", "OK"],ui)
             player.add(x)
         case 'D':
-            ui_command(["IT'S TIME TO DUEL!!!1!!1!", "HELL YEAH!"],ui)
+            ui_command(["IT'S TIME TO DUEL!!!1!!1!", "HELL YEAH!"],ui, False)
             players_available = list(filter(lambda n: n != player and n.properties != [],players))
             if players_available ==  []: 
                 ui_command(["Es stehen keine Spieler zur Auswahl", "OK"], ui)
@@ -40,10 +40,10 @@ def action(f, player, players, properties):
                 player.properties.append(played_property)
                 played_property.owner = player
         case 'P':
-            ui_command(["Du bist auf einem Geländefeld!","OK"],ui)
+            ui_command(["Du bist auf einem Geländefeld!"],ui, False)
             index = int(f[1:])
             owned = properties[index].owner != None
-            ui_command([properties[index].output() + "; Besitzer: " + (properties[index].owner.name if owned else '- ') + f"; Preis: {properties[index].base_cost}$","OK"],ui)
+            ui_command([properties[index].output() + "; Besitzer: " + (properties[index].owner.name if owned else '- ') + f"; Preis: {properties[index].base_cost}$"],ui, False)
 
             if not owned:
                 if yes_no("Kaufen?",ui):
@@ -157,7 +157,7 @@ if __name__ == '__main__':
         elif commands[c] == UI_TOKEN['UI_TOKEN_ROLL']:
             w1 = random.randrange(1,6)
             w2 = random.randrange(1,6)
-            ui_command(["Du hast gewürfelt: " + str(w1) + " + " + str(w2), "OK"],ui)
+            ui_command(["Du hast gewürfelt: " + str(w1) + " + " + str(w2)],ui, False)
             p = players[cur_player]
             p.move(w1+w2, 25)
             ui_display(properties,players,ui)

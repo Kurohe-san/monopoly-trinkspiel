@@ -31,7 +31,7 @@ REGELN:
 """
 
 def yes_no(query,ui,yes_first=False):
-    return ui_command([query] + (["Ja","Nein"] if yes_first else ["Nein","Ja"]),ui) == 2
+    return ui_command([query] + (["Ja","Nein"] if yes_first else ["Nein","Ja"]),ui, False) == 2
 
 def gen_money_card():
     return random.randrange(-2000,10000)
@@ -149,3 +149,5 @@ class UI:
         self.minStartCommand = 0
         self.height,self.width = self.stdscr.getmaxyx()
         self.numberStreets = 0
+        self.heightOffset = 0
+        self.savedCommands = []
